@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Channel List</title>
+    <style>
+        .channel-list-container {
+            max-width: 600px; /* Adjust the maximum width as needed */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #channel-table td {
+            padding: 5px; /* Adjust the padding value as needed */
+        }
+        .channel-list {
+            list-style: none; /* Remove default list bullets */
+            padding: 0;
+        }
+
+        .channel-name {
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .selected {
+            background-color: yellow;
+        }
+
+        .icon {
+            margin-left: 5px;
+        }
+
+        /* Style for displaying channel data */
+        .channel-data {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .channel-data h2 {
+            margin: 0;
+        }
+
+        .channel-data ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .channel-data li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select a channel</h1>
+    <div class="channel-list-container">
+        <ul class="channel-list">
+            {% for i in range(channel_ids|length) %}
+            <li class="channel-name" data-channel="{{ channel_names[i] }}" data-channel-id="{{ channel_ids[i] }}">
+                {{ channel_names[i] }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div id="channel-details">
+        <div id="channel-details">
+            <h2>Channel Data</h2>
+            <table id="channel-table">
+                <thead>
+                    <tr>
+                        <th>Thumbnail</th>
+                        <th>Title</th>
+                        <th>Views </th>
+                        <th>Length</th>
+                        <th>Published Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table rows will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+    <a href="/">Back to Home</a>
+    <script>
+        // JavaScript code to add or remove the "selected" class dynamically
+        const channelList = document.querySelector(".channel-list");
+        const channelDetails = document.getElementById("channel-details");
+        const channelTable = document.getElementById("channel-table").querySelector("tbody");
+
+        channelList.addEventListener("click", (event) => {
+            if (event.target.classList.contains("channel-name")) {
+                // Remove "selected" class from all channel names
+                const channelItems = document.querySelectorAll(".channel-name");
+                channelItems.forEach((item) => {
+                    item.classList.remove("selected");
+                });
+
+                // Highlight the clicked channel name
+                event.target.classList.add("selected");
+
+                // Fetch and display additional data (replace with your logic)
+                const channelName = event.target.getAttribute("data-channel");
+                const channelId = event.target.getAttribute("data-channel-id");
+                const imageUrlPattern = "http://img.youtube.com/vi_webp/{video_id}/default.webp";
+
+                // Make a fetch request to your Flask route to fetch channel data
+                fetch(`/get_channel_data/${channelId}`)
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok");
+                        }
+                        return response.text(); // Read the response as text
+                    })
+                    .then((data) => {
+                        try {
+                            const jsonData = JSON.parse(data);
+                            if (Array.isArray(jsonData) && jsonData.length > 0) {
+                                // Clear existing table rows
+                                channelTable.innerHTML = "";
+
+                                // Populate the table with data
+                                jsonData.forEach((item) => {
+                                    const row = document.createElement("tr");
+                                    row.innerHTML = `
+                                        <td><img src="${imageUrlPattern.replace("{video_id}", item.video_id)}" alt="Video Thumbnail"></td>
+                                        <td>${item.title}</td>
+                                        <td>${item.views}</td>
+                                        <td>${item.duration}</td>
+                                        <td>${item.published_date}</td>
+                                    `;
+                                    channelTable.appendChild(row);
+                                });
+                            } else {
+                                channelTable.innerHTML = "<tr><td colspan='4'>No data available for this channel.</td></tr>";
+                            }
+                        } catch (error) {
+                            channelTable.innerHTML = `<tr><td colspan='4'>${data}</td></tr>`;
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error fetching data:", error);
+                    });
+            }
+        });
+
+    </script>
+</body>
+</html>
