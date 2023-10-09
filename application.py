@@ -2,14 +2,43 @@ from flask import Flask, render_template, request, jsonify
 import mysql.connector
 from config import create_db_connection, YT_API_KEY
 import requests
+from googleapiclient.discovery import build
 
-
+youtube_service = build('youtube','v3', developerKey=YT_API_KEY)
 
 application = Flask(__name__)
 
 @application.route('/')
 def index():
     return render_template("index.html")
+
+@application.route('/search', methods=['GET','POST'])
+def search_channel():
+    if request.method == "POST":
+        
+        channel_query = request.form['channel_query']
+        
+        if not channel_query:
+            return "Please enter a channel name ore ID."
+        
+        search_response = youtube_service.search().list(
+            q=channel_query,
+            type='channel',
+            part='id,snippet'
+        ).execute()
+        
+        # Check response for channels
+        if 'items' in search_response:
+            channel_info = search_response['items'][0]
+            
+            channel_id = channel_info['id']['channelId']
+            name = channel_info['snippet']['title']
+            
+            return f"Channel '{name}' (ID: {channel_id}) found."
+        else:
+            return "Channel not found."
+        
+    return render_template('search_channel.html')
 
 @application.route('/channels')
 def channels():
