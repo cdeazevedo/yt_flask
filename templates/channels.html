@@ -28,6 +28,9 @@
     </style>
 </head>
 <body>
+    {% extends "base.html" %}
+
+    {% block content %}
     <h1>Select a channel</h1>
     <div class="channel-list">
         <ul>
@@ -36,6 +39,7 @@
             {% endfor %}
         </ul>
     </div>
+    {% endblock %}
     <!-- Section for displaying channel data -->
     <div id="channel-data">
         <!-- Placeholder for channel data (initially empty) -->

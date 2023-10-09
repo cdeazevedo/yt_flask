@@ -5,6 +5,9 @@
     <title>Search YouTube Channel</title>
 </head>
 <body>
+    {% extends "base.html" %}
+
+    {% block content %}
     <h1>Search for a YouTube Channel</h1>
     <form method="POST" action="/search">
         <label for="channel_query">Enter Channel Name or ID:</label>
@@ -26,5 +29,6 @@
         </form>
     </div>
     {% endif %}
+    {% endblock %}
 </body>
 </html>
