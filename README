@@ -1,1 +1,23 @@
-### This is a python Flask application for YouTube channel analytics
+## This is a python Flask application for YouTube channel analytics
+This project requires a few things I can't give you to work:
+## database/config.py file
+
+```
+import mysql.connector
+
+db_config = {
+    'host': 'endpoint_to_amazon_RDS',
+    'user': 'your_username',
+    'password': 'your_password',
+    'database': 'name_of_database'
+}
+
+def create_db_connection():
+    return mysql.connector.connect(**db_config)
+```
+## YouTube API access and KEY
+API key stored in file 'key' in root of project.   
+Follow instructions at https://developers.google.com/youtube/v3/getting-started.  
+youtube-api.json file stored in root of project as well.
+
+## Access to AWS and all that jazz.

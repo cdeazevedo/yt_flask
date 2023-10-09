@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, jsonify
 import mysql.connector
-from config import create_db_connection
+from config import create_db_connection, YT_API_KEY
+import requests
+
+
 
 application = Flask(__name__)
 
@@ -11,23 +14,23 @@ def index():
 @application.route('/channels')
 def channels():
     connection = create_db_connection()
-    channel_names = []
-    
+    channel_data = []
+
     try:
         with connection.cursor() as cursor:
             cursor.execute('SELECT channel_id, name from channels')
             channel_data = cursor.fetchall()
-            
+
     except mysql.connector.Error as err:
         print("Error: ", err)
-        
+
     finally:
         connection.close()
-        
-    channel_ids = [row[0] for row in channel_data]
-    channel_names = [row[1] for row in channel_data]
-        
-    return render_template("channels.html", channel_ids=channel_ids,channel_names=channel_names)
+
+    # Preprocess the data into a list of dictionaries
+    channels = [{'channel_id': row[0], 'channel_name': row[1]} for row in channel_data]
+
+    return render_template("channels.html", channels=channels)
 
 @application.route('/get_channel_data/<channel_id>')
 def get_channel_data(channel_id):
@@ -48,9 +51,25 @@ def get_channel_data(channel_id):
             ORDER BY vv.views DESC
             LIMIT 10
             '''
+            
             #cursor.execute('SELECT title, views, duration, published_date FROM videos WHERE v.channel_id = %s LIMIT 15', (channel_id,))
             cursor.execute(sql_query, (channel_id,))
             channel_data = cursor.fetchall()
+          
+            views_sql_query = '''
+            SELECT FORMAT(SUM(vv.views), 0)
+            FROM videos as v 
+            LEFT JOIN video_views as vv on v.video_id = vv.video_id
+            WHERE v.channel_id = %s
+            AND vv.timestamp = (
+                SELECT MAX(timestamp) FROM video_views
+                WHERE video_id = v.video_id
+            )
+            ORDER BY vv.views DESC
+            '''
+            
+            cursor.execute(views_sql_query, (channel_id,))
+            total_views = cursor.fetchall()[0][0]
             
     except mysql.connector.Error as err:
         print("Error: ", err)
@@ -59,21 +78,23 @@ def get_channel_data(channel_id):
     finally:
         connection.close()
 
+    # Get Profile pic URL
+    thumbnail_request_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet&id={channel_id}&fields=items%2Fsnippet%2Fthumbnails&key={YT_API_KEY}" 
+    response = requests.get(thumbnail_request_url)
+    if response.status_code == 200:
+        thumbnail_url = response.json()['items'][0]['snippet']['thumbnails']['default']['url']
+        print(thumbnail_url)
+    else:
+        thumbnail_url = None  # Set to None if there's an error or no URL
+
     # Check if there is data available
     if channel_data:
-        # You can format the data as needed, for example, as a list of dictionaries
-        formatted_data = [
-            {
-                "title": row[0],
-                "views": row[1],
-                "duration": row[2],
-                "published_date": row[3],
-                "video_id": row[4]
-            }
-            for row in channel_data
-        ]
-        # Return the data as JSON
-        return jsonify(formatted_data)
+        return render_template(
+            "channel_data.html",
+            thumbnail_url=thumbnail_url,
+            channel_data=channel_data,
+            total_views=total_views
+        )
     else:
         # If no data is available, return a message or an empty response
         return "No data available for this channel."

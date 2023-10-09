@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Add your HTML head content here, if needed -->
+</head>
+<body>
+    <h1>Channel Data</h1>
+    
+    <!-- Display the channel thumbnail -->
+    <img src="{{ thumbnail_url }}" alt="Channel Thumbnail">
+    
+    <!-- Display the total views -->
+    <p>Total Views: {{ total_views }}</p>
+    
+    <!--Table of vidoe data -->
+    <h3>Top all-time videos</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Thumbnail</th>
+                <th>Title</th>
+                <th>Views</th>
+                <th>Duration</th>
+                <th>Published Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for video in channel_data %}
+                <tr>
+                    <td>
+                        <img src="http://img.youtube.com/vi_webp/{{ video[4] }}/default.webp" alt="Video Thumbnail">
+                    </td>
+                    <td>{{ video[0] }}</td>
+                    <td>{{ video[1] }}</td>
+                    <td>{{ video[2] }}</td>
+                    <td>{{ video[3] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
