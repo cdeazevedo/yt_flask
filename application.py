@@ -12,14 +12,14 @@ application = Flask(__name__)
 def index():
     return render_template("index.html")
 
-@application.route('/search', methods=['GET','POST'])
+@application.route('/search', methods=['POST'])
 def search_channel():
     if request.method == "POST":
         
         channel_query = request.form['channel_query']
         
         if not channel_query:
-            return "Please enter a channel name ore ID."
+            return "Please enter a channel name or ID."
         
         search_response = youtube_service.search().list(
             q=channel_query,
@@ -33,12 +33,36 @@ def search_channel():
             
             channel_id = channel_info['id']['channelId']
             name = channel_info['snippet']['title']
-            
-            return f"Channel '{name}' (ID: {channel_id}) found."
-        else:
-            return "Channel not found."
+                    
+            return render_template('search_channel.html', channel_found=True, 
+                                   channel_id=channel_id, channel_name=name)
+        else: 
+            return render_template('search_channel.html', channel_found=False)
+
+@application.route('/search', methods=['GET'])
+def display_search_form():
+    return render_template('search_channel.html', channel_found=False)
+
+@application.route('/confirm', methods=['POST'])
+def confirm_track():
+    channel_id = request.form['channel_id']
+    channel_name = request.form['channel_name']
+    sql_query_save = """
+    INSERT INTO channels(channel_id, name)
+    VALUES (%s, %s)
+    ON DUPLICATE KEY UPDATE name = VALUES(name);
+    """
+    connection = create_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(sql_query_save)
+        print("Channel Saved")
+    except mysql.connector.Error as err:
+        print("Error: ", err)
         
-    return render_template('search_channel.html')
+    finally:
+        connection.close()
+    return f"Now tracking: {channel_name} (channel id: {channel_id})."
 
 @application.route('/channels')
 def channels():

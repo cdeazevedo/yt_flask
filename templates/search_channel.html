@@ -11,5 +11,18 @@
         <input type="text" name="channel_query" id="channel_query" required>
         <input type="submit" value="Search">
     </form>
+
+    {% if channel_found %}
+    <div>
+        <h2>Channel Found:</h2>
+        <p>Name: {{ channel_name }}</p>
+        <p>Channel ID: {{ channel_id }}</p>
+        <form method="POST" action="/confirm">
+            <input type="hidden" name="channel_id" value="{{ channel_id }}">
+            <input type="hidden" name="channel_name" value="{{ channel_name }}">
+            <input type="submit" value="Confirm Track">
+        </form>
+    </div>
+    {% endif %}
 </body>
 </html>
