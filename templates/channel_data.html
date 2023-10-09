@@ -50,6 +50,7 @@
         </thead>
         <tbody>
             {% for video in channel_data %}
+                {% if loop.index <= 10 %} {# Limit to the top ten videos #}
                 <tr>
                     <td>
                         <img src="http://img.youtube.com/vi_webp/{{ video[4] }}/default.webp" alt="Video Thumbnail">
@@ -59,9 +60,12 @@
                     <td>{{ video[2] }}</td>
                     <td>{{ video[3] }}</td>
                 </tr>
+                {% endif %}
             {% endfor %}
         </tbody>
     </table>
+
+    <h3>Current most-viewed videos</h3>
 
 </body>
 </html>

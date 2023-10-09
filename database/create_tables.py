@@ -10,7 +10,8 @@ cursor = connection.cursor()
 create_channel_table_sql = """
 CREATE TABLE IF NOT EXISTS channels (
     channel_id VARCHAR(255) PRIMARY KEY,
-    name VARCHAR(255)
+    name VARCHAR(255),
+    thumbnail_uri VARCHAR(255)
 )
 """
 

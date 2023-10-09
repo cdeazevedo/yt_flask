@@ -149,7 +149,7 @@ def get_channel_data(channel_id):
         )
     else:
         # If no data is available, return a message or an empty response
-        return "No data available for this channel."
+        return "No data available for this channel. Try again later."
 
 @application.route("/db_test", methods=['GET', 'POST'])
 def db_test():
