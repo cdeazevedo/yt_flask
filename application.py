@@ -33,9 +33,11 @@ def search_channel():
             
             channel_id = channel_info['id']['channelId']
             name = channel_info['snippet']['title']
+            thumbnail_uri = channel_info['snippet']['thumbnails']['default']['url']
                     
             return render_template('search_channel.html', channel_found=True, 
-                                   channel_id=channel_id, channel_name=name)
+                                   channel_id=channel_id, channel_name=name,
+                                   thumbnail_uri = thumbnail_uri)
         else: 
             return render_template('search_channel.html', channel_found=False)
 
@@ -47,15 +49,17 @@ def display_search_form():
 def confirm_track():
     channel_id = request.form['channel_id']
     channel_name = request.form['channel_name']
+    thumbnail_uri = request.form['thumbnail_uri']
     sql_query_save = """
-    INSERT INTO channels(channel_id, name)
-    VALUES (%s, %s)
-    ON DUPLICATE KEY UPDATE name = VALUES(name);
+    INSERT INTO channels(channel_id, name, thumbnail_uri)
+    VALUES (%s, %s, %s)
+    ON DUPLICATE KEY UPDATE name = VALUES(name), thumbnail_uri = VALUES(thumbnail_uri);
     """
     connection = create_db_connection()
     try:
         with connection.cursor() as cursor:
-            cursor.execute(sql_query_save)
+            cursor.execute(sql_query_save, (channel_id, channel_name, thumbnail_uri))
+            connection.commit()
         print("Channel Saved")
     except mysql.connector.Error as err:
         print("Error: ", err)
