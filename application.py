@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 import mysql.connector
 from config import create_db_connection, YT_API_KEY
 import requests
@@ -12,10 +12,9 @@ application = Flask(__name__)
 def index():
     return render_template("index.html")
 
-@application.route('/search', methods=['POST'])
+@application.route('/search', methods=['GET', 'POST'])
 def search_channel():
     if request.method == "POST":
-        
         channel_query = request.form['channel_query']
         
         if not channel_query:
@@ -37,13 +36,12 @@ def search_channel():
                     
             return render_template('search_channel.html', channel_found=True, 
                                    channel_id=channel_id, channel_name=name,
-                                   thumbnail_uri = thumbnail_uri)
+                                   thumbnail_uri=thumbnail_uri)
         else: 
             return render_template('search_channel.html', channel_found=False)
-
-@application.route('/search', methods=['GET'])
-def display_search_form():
-    return render_template('search_channel.html', channel_found=False)
+    else:
+        # Handle GET request to display the search form
+        return render_template('search_channel.html', channel_found=False)
 
 @application.route('/confirm', methods=['POST'])
 def confirm_track():
@@ -106,10 +104,9 @@ def get_channel_data(channel_id):
                 WHERE video_id = v.video_id
             )
             ORDER BY vv.views DESC
-            LIMIT 10
             '''
             
-            #cursor.execute('SELECT title, views, duration, published_date FROM videos WHERE v.channel_id = %s LIMIT 15', (channel_id,))
+    
             cursor.execute(sql_query, (channel_id,))
             channel_data = cursor.fetchall()
           
@@ -128,22 +125,20 @@ def get_channel_data(channel_id):
             cursor.execute(views_sql_query, (channel_id,))
             total_views = cursor.fetchall()[0][0]
             
+            thumbnail_sql_query = '''
+            SELECT thumbnail_uri FROM
+            channels WHERE channel_id = %s
+            '''
+            cursor.execute(thumbnail_sql_query, (channel_id,))
+            thumbnail_url = cursor.fetchall()[0][0]
+            
     except mysql.connector.Error as err:
         print("Error: ", err)
         # Handle the error, e.g., return an error message or an empty list
 
     finally:
         connection.close()
-
-    # Get Profile pic URL
-    thumbnail_request_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet&id={channel_id}&fields=items%2Fsnippet%2Fthumbnails&key={YT_API_KEY}" 
-    response = requests.get(thumbnail_request_url)
-    if response.status_code == 200:
-        thumbnail_url = response.json()['items'][0]['snippet']['thumbnails']['default']['url']
-        print(thumbnail_url)
-    else:
-        thumbnail_url = None  # Set to None if there's an error or no URL
-
+    
     # Check if there is data available
     if channel_data:
         return render_template(
