@@ -58,13 +58,13 @@ def confirm_track():
         with connection.cursor() as cursor:
             cursor.execute(sql_query_save, (channel_id, channel_name, thumbnail_uri))
             connection.commit()
-        print("Channel Saved")
+        #print("Channel Saved")
     except mysql.connector.Error as err:
         print("Error: ", err)
         
     finally:
         connection.close()
-    return f"Now tracking: {channel_name} (channel id: {channel_id})."
+    return f"Now tracking: {channel_name} (channel id: {channel_id}).\n <a href='/search'>Back</a>"
 
 @application.route('/channels')
 def channels():
@@ -73,7 +73,7 @@ def channels():
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute('SELECT channel_id, name from channels')
+            cursor.execute('SELECT channel_id, name from channels ORDER BY name')
             channel_data = cursor.fetchall()
 
     except mysql.connector.Error as err:
@@ -109,9 +109,10 @@ def get_channel_data(channel_id):
     
             cursor.execute(sql_query, (channel_id,))
             channel_data = cursor.fetchall()
-          
+            total_videos = len(channel_data)
+            
             views_sql_query = '''
-            SELECT FORMAT(SUM(vv.views), 0)
+            SELECT SUM(vv.views)
             FROM videos as v 
             LEFT JOIN video_views as vv on v.video_id = vv.video_id
             WHERE v.channel_id = %s
@@ -124,6 +125,12 @@ def get_channel_data(channel_id):
             
             cursor.execute(views_sql_query, (channel_id,))
             total_views = cursor.fetchall()[0][0]
+            average_views_per_video = int(total_views // total_videos)
+            
+            #Format values for prettiness
+            total_views = '{:,}'.format(total_views)
+            average_views_per_video = '{:,}'.format(average_views_per_video)
+            total_videos = '{:,}'.format(total_videos)
             
             thumbnail_sql_query = '''
             SELECT thumbnail_uri FROM
@@ -145,7 +152,9 @@ def get_channel_data(channel_id):
             "channel_data.html",
             thumbnail_url=thumbnail_url,
             channel_data=channel_data,
-            total_views=total_views
+            total_views=total_views,
+            total_videos=total_videos,
+            average_views_per_video=average_views_per_video
         )
     else:
         # If no data is available, return a message or an empty response

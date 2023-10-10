@@ -34,8 +34,9 @@
     <img src="{{ thumbnail_url }}" alt="Channel Thumbnail">
     
     <!-- Display the total views -->
-    <p>Total Views: {{ total_views }}</p>
-    
+    <p>Total views: {{ total_views }}</p>
+    <p>Total videos: {{ total_videos }}</p>
+    <p>Average views per video: {{ average_views_per_video }}</p>
     <!--Table of vidoe data -->
     <h3>Top all-time videos</h3>
     <table>
@@ -49,8 +50,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for video in channel_data %}
-                {% if loop.index <= 10 %} {# Limit to the top ten videos #}
+            {% for video in channel_data %}  
                 <tr>
                     <td>
                         <img src="http://img.youtube.com/vi_webp/{{ video[4] }}/default.webp" alt="Video Thumbnail">
@@ -60,7 +60,6 @@
                     <td>{{ video[2] }}</td>
                     <td>{{ video[3] }}</td>
                 </tr>
-                {% endif %}
             {% endfor %}
         </tbody>
     </table>

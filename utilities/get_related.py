@@ -59,7 +59,7 @@ def getRelatedVideos(videoId):
 def getChannelData(channelIds):
     """pass in channel id or channel ids and get some data back"""
     request=youtube.channels().list(
-        part='snippet,statistics,contentDetails',
+        part='snippet,statistics,contentDetails,topicDetails',
         id=channelIds
     )
     response=request.execute()
