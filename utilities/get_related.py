@@ -1,14 +1,9 @@
-# import pandas as pd
-# import numpy as np
-# from re import S
+
 from itertools import compress
 from timeit import timeit
 import googleapiclient.discovery
 import googleapiclient.errors
-# from google.oauth2 import service_account
-# from google.cloud import vision
 from dateutil import parser
-# from proto import INT32
 from datetime import timedelta, datetime, timezone
 from config import YT_API_KEY
 
@@ -16,34 +11,9 @@ api_service_name='youtube'
 api_version='v3'
 key = YT_API_KEY
 
-# def openScript():
-#     """helper to reload script"""
-#     return open("get_related.py").read()
-
-# def averageList(list):
-#     total=sum(list)
-#     count=len(list)
-#     return total/count
-
-# def counter(listToCount):
-#     """helper to count values"""
-#     values=list(set(listToCount))
-#     counts=[]
-#     for value in values:
-#         n=0
-#         for item in listToCount:
-#             if value==item:
-#                 n+=1
-#         counts.append(n)
-#     return [values,counts] 
-
-
-
-
 youtube=googleapiclient.discovery.build(
     api_service_name, api_version, developerKey=key
 )
-
 
 def getRelatedVideos(videoId):
     """Get related video set from API"""
@@ -154,12 +124,6 @@ def getPlaylistIds(channelData):
     uploadsId=[playlistId['uploads'] for playlistId in relatedPlaylists]
     return uploadsId
 
-# def relatedChannelCount(relatedVideos):
-#     """Function to return count of related channels"""
-#     channelTitles = getResponseItems(relatedVideos,'snippet','channelTitle')
-#     counts=counter(channelTitles)
-#     [print('{:60s}'.format(x),'\t','{:,.0f}'.format(y)) for x,y in zip(counts[0],counts[1])]
-
 def printChannelViews(channelData):
     """Silly function to print out channel, views, and avg view count"""
     channelNames=getResponseItems(channelData,'snippet','title')
@@ -180,26 +144,11 @@ def daysFromToday(datetimes,daysStart,daysEnd):
     beforeEnd=[(today-datetime) < timedelta(days=daysEnd) for datetime in datetimes]
     return [after and before for after,before in zip(afterStart,beforeEnd)]
 
-# def videoViewsByDate(videoStatistics):
-#     """Pop in a videoStatistics object and get summary of views by date"""
-#     publishedAt=[parser.parse(item['snippet']['publishedAt']) for item in videoStatistics['items']]
-#     views=[float(item['statistics']['viewCount']) for item in videoStatistics['items']]
-
-#     # calculate bins of video views index
-#     index30days=daysFromToday(publishedAt,0,30)
-#     index60days=daysFromToday(publishedAt,30,60)
-#     index90days=daysFromToday(publishedAt,60,90)
-#     average30=averageList(list(compress(views,index30days)))
-#     average60=averageList(list(compress(views,index60days)))
-#     average90=averageList(list(compress(views,index90days)))
-#     [print('{:,.0f}'.format(x)) for x in [average30,average60,average90]]
-
 def viewCount(videoStatistics):
     """Get list of viewCount as numeric from videoStatistics"""
     viewCount=[]
     [viewCount.append(float(views['statistics']['viewCount'])) for views in videoStatistics['items']]
     return viewCount
-
 
 def durationException(item):
     """helper for 0D time stamp"""
