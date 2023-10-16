@@ -190,7 +190,10 @@ def get_channel_data(channel_id):
             grouped.sort_values('realtime_views_estimate', inplace=True, ascending=False)
             realtime_df = grouped[['video_id', 'title', 'published_date', 'realtime_views_estimate']]
             realtime_df_as_dict = realtime_df.to_dict(orient='records')
+            print(realtime_df[:0])
             print(realtime_df_as_dict[0])
+            for item in realtime_df_as_dict:
+                item['realtime_views_estimate'] = '{:,}'.format(round(item['realtime_views_estimate'],0))
             ## recent uploads
             recent_data = sorted(channel_data, key=lambda x: x[6], reverse=True)
             
