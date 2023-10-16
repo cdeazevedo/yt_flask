@@ -3,6 +3,8 @@ import mysql.connector
 from config import create_db_connection, YT_API_KEY
 import requests
 from googleapiclient.discovery import build
+import datetime
+import pandas as pd
 
 youtube_service = build('youtube','v3', developerKey=YT_API_KEY)
 
@@ -58,7 +60,6 @@ def confirm_track():
         with connection.cursor() as cursor:
             cursor.execute(sql_query_save, (channel_id, channel_name, thumbnail_uri))
             connection.commit()
-        #print("Channel Saved")
     except mysql.connector.Error as err:
         print("Error: ", err)
         
@@ -95,7 +96,7 @@ def get_channel_data(channel_id):
         with connection.cursor() as cursor:
             # SQL Query
             sql_query = '''
-            SELECT v.title, FORMAT(vv.views, 0), v.duration, DATE_FORMAT(v.published_date, '%d-%b-%Y') as formatted_date, v.video_id
+            SELECT v.title, FORMAT(vv.views, 0), v.duration, DATE_FORMAT(v.published_date, '%d-%b-%Y') as formatted_date, v.video_id, v.published_date
             FROM videos as v 
             LEFT JOIN video_views as vv on v.video_id = vv.video_id
             WHERE v.channel_id = %s
@@ -125,19 +126,48 @@ def get_channel_data(channel_id):
             
             cursor.execute(views_sql_query, (channel_id,))
             total_views = cursor.fetchall()[0][0]
-            average_views_per_video = int(total_views // total_videos)
+            if total_views:
+                average_views_per_video = int(total_views // total_videos)
             
-            #Format values for prettiness
-            total_views = '{:,}'.format(total_views)
-            average_views_per_video = '{:,}'.format(average_views_per_video)
-            total_videos = '{:,}'.format(total_videos)
+                #Format values for prettiness
+                total_views = '{:,}'.format(total_views)
+                average_views_per_video = '{:,}'.format(average_views_per_video)
+                total_videos = '{:,}'.format(total_videos)
             
             thumbnail_sql_query = '''
             SELECT thumbnail_uri FROM
-            channels WHERE channel_id = %s
+            channels WHERE channel_id = %s  
             '''
             cursor.execute(thumbnail_sql_query, (channel_id,))
             thumbnail_url = cursor.fetchall()[0][0]
+            
+            
+            # Set date range
+            seven_days_ago = datetime.datetime.now() - datetime.timedelta(days=7)
+            seven_days_ago_str = seven_days_ago.strftime('%Y-%m-%d %H:%M:%S')
+            
+            ## Get data for realtime views 
+            realtime_sql_query = '''
+            SELECT v.title, vv.views, v.duration, DATE_FORMAT(v.published_date, '%d-%b-%Y') as formatted_date, v.video_id, v.published_date, vv.timestamp
+            FROM videos as v 
+            LEFT JOIN video_views as vv on v.video_id = vv.video_id
+            WHERE v.channel_id = %s
+            AND vv.timestamp >= %s
+            ORDER BY v.video_id, vv.timestamp 
+            '''
+            
+            cursor.execute(realtime_sql_query, (channel_id, seven_days_ago_str))
+            realtime_data = cursor.fetchall()
+    
+            df = pd.DataFrame(realtime_data, 
+                              columns=['title', 'views', 'duration', 
+                                       'published_date', 'video_id', 
+                                       'published_date', 'timestamp'])
+            
+            df['change_in_views'] = df.groupby('video_id')['views'].diff()
+            df['change_in_timestamp'] = df.groupby('video_id')['timestamp'].diff()
+            print(df[['title','views','change_in_views','change_in_timestamp']])
+            
             
     except mysql.connector.Error as err:
         print("Error: ", err)

@@ -1,10 +1,7 @@
-
-from itertools import compress
-from timeit import timeit
 import googleapiclient.discovery
 import googleapiclient.errors
 from dateutil import parser
-from datetime import timedelta, datetime, timezone
+from datetime import timedelta, datetime
 from config import YT_API_KEY
 
 api_service_name='youtube'
@@ -14,17 +11,6 @@ key = YT_API_KEY
 youtube=googleapiclient.discovery.build(
     api_service_name, api_version, developerKey=key
 )
-
-def getRelatedVideos(videoId):
-    """Get related video set from API"""
-    request=youtube.search().list(
-        part='snippet',
-        type='video',
-        maxResults=50,
-        relatedToVideoId=videoId
-    )
-    response=request.execute()
-    return response
 
 def getChannelData(channelIds):
     """pass in channel id or channel ids and get some data back"""
@@ -124,25 +110,9 @@ def getPlaylistIds(channelData):
     uploadsId=[playlistId['uploads'] for playlistId in relatedPlaylists]
     return uploadsId
 
-def printChannelViews(channelData):
-    """Silly function to print out channel, views, and avg view count"""
-    channelNames=getResponseItems(channelData,'snippet','title')
-    channelViews=getResponseItems(channelData,'statistics','viewCount')
-    channelVideos=getResponseItems(channelData,'statistics','videoCount')
-    averageViews=[eval(views)/eval(videos) for views,videos in zip(channelViews, channelVideos)]
-    [print('{:<60s}'.format(x),'\t',"{:,.0f}".format(y)) for x,y in zip(channelNames,averageViews)]
-
 def channelNameFrom(videoStatistics): 
     """Return channel Name from videoStatistics object"""
     return videoStatistics['items'][0]['snippet']['channelTitle']
-
-def daysFromToday(datetimes,daysStart,daysEnd):
-    """Silly helper function for checking date differences. Used in videoViewsByDate"""
-    # for example, is this date between 30 days and 60 days = daysFromToday(date,30,60)
-    today=datetime.now(timezone.utc)
-    afterStart=[(today-datetime) >= timedelta(days=daysStart) for datetime in datetimes]
-    beforeEnd=[(today-datetime) < timedelta(days=daysEnd) for datetime in datetimes]
-    return [after and before for after,before in zip(afterStart,beforeEnd)]
 
 def viewCount(videoStatistics):
     """Get list of viewCount as numeric from videoStatistics"""

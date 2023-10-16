@@ -37,7 +37,7 @@
     <p>Total views: {{ total_views }}</p>
     <p>Total videos: {{ total_videos }}</p>
     <p>Average views per video: {{ average_views_per_video }}</p>
-    <!--Table of vidoe data -->
+    <!--Table of video data -->
     <h3>Top all-time videos</h3>
     <table>
         <thead>
@@ -63,8 +63,59 @@
             {% endfor %}
         </tbody>
     </table>
-
+    <!--Table of realtime video data-->
     <h3>Current most-viewed videos</h3>
-
+    <table>
+        <thead>
+            <tr>
+                <th>Thumbnail</th>
+                <th>Title</th>
+                <th>Views (last 48 hours)</th>
+                <th>Duration</th>
+                <th>Published Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for video in real_time_data %}
+            <tr>
+                <td>
+                    <img src="http://img.youtube.com/vi_webp/{{ video[4] }}/default.webp" alt="Video Thumbnail">
+                </td>
+                <td>{{ video[0] }}</td>
+                <td>{{ video[1] }}</td>
+                <td>{{ video[2] }}</td>
+                <td>{{ video[3] }}</td>
+                <td>{{ video[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!--Table of most recent videos-->
+    <h3>Recent uploads</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Thumbnail</th>
+                <th>Title</th>
+                <th>Views</th>
+                <th>Duration</th>
+                <th>Published Date</th> 
+            </tr>
+        </thead>
+        <tbody>
+            {% for video in recent_data %}
+            <tr>
+                <td>
+                    <img src="http://img.youtube.com/vi_webp/{{ video[4] }}/default.webp" alt="Video Thumbnail">
+                </td>
+                <td>{{ video[0] }}</td>
+                <td>{{ video[1] }}</td>
+                <td>{{ video[2] }}</td>
+                <td>{{ video[3] }}</td>
+                <td>{{ video[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>    
 </body>
 </html>

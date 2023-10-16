@@ -32,7 +32,7 @@ create_video_views_table = """
     CREATE TABLE IF NOT EXISTS video_views (
     id INT AUTO_INCREMENT PRIMARY KEY,
     video_id VARCHAR(255),
-    views INT,
+    views BIGINT,
     timestamp DATETIME
 )
 """
