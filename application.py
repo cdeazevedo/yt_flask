@@ -5,6 +5,9 @@ import requests
 from googleapiclient.discovery import build
 import datetime
 import pandas as pd
+import base64
+from io import BytesIO
+from matplotlib.figure import Figure
 
 youtube_service = build('youtube','v3', developerKey=YT_API_KEY)
 
@@ -96,7 +99,14 @@ def get_channel_data(channel_id):
         with connection.cursor() as cursor:
             # SQL Query
             sql_query = '''
-            SELECT v.title, FORMAT(vv.views, 0), v.duration, DATE_FORMAT(v.published_date, '%d-%b-%Y') as formatted_date, v.video_id, v.published_date
+            SELECT 
+                v.title,
+                FORMAT(vv.views, 0),
+                v.duration, 
+                ROUND((vv.views / SUM(vv.views) OVER ()) * 100, 1) AS percent_of_total_views,
+                DATE_FORMAT(v.published_date, '%d-%b-%Y') as formatted_date, 
+                v.video_id, 
+                v.published_date
             FROM videos as v 
             LEFT JOIN video_views as vv on v.video_id = vv.video_id
             WHERE v.channel_id = %s
@@ -161,13 +171,28 @@ def get_channel_data(channel_id):
     
             df = pd.DataFrame(realtime_data, 
                               columns=['title', 'views', 'duration', 
-                                       'published_date', 'video_id', 
+                                       'formatted_published_date', 'video_id', 
                                        'published_date', 'timestamp'])
             
             df['change_in_views'] = df.groupby('video_id')['views'].diff()
             df['change_in_timestamp'] = df.groupby('video_id')['timestamp'].diff()
-            print(df[['title','views','change_in_views','change_in_timestamp']])
-            
+            df.dropna(inplace=True)
+            df['change_in_timestamp_hours'] = df['change_in_timestamp'].dt.total_seconds() / 3600
+            grouped = df.groupby('video_id', ).agg({
+                'change_in_views' : 'sum',
+                'change_in_timestamp_hours' : 'sum',
+                'title': 'first',  # Keep the first 'title' value
+                'published_date': 'first'  # Keep the first 'published_date' value
+            }).reset_index()
+            # Calculate real-time (48 hour) view estimate
+            grouped['change_in_views_per_hour'] = grouped['change_in_views'] / grouped['change_in_timestamp_hours']
+            grouped['realtime_views_estimate']  = grouped['change_in_views_per_hour'] * 48
+            grouped.sort_values('realtime_views_estimate', inplace=True, ascending=False)
+            realtime_df = grouped[['video_id', 'title', 'published_date', 'realtime_views_estimate']]
+            realtime_df_as_dict = realtime_df.to_dict(orient='records')
+            print(realtime_df_as_dict[0])
+            ## recent uploads
+            recent_data = sorted(channel_data, key=lambda x: x[6], reverse=True)
             
     except mysql.connector.Error as err:
         print("Error: ", err)
@@ -184,7 +209,9 @@ def get_channel_data(channel_id):
             channel_data=channel_data,
             total_views=total_views,
             total_videos=total_videos,
-            average_views_per_video=average_views_per_video
+            average_views_per_video=average_views_per_video,
+            recent_data=recent_data,
+            realtime_df_as_dict = realtime_df_as_dict
         )
     else:
         # If no data is available, return a message or an empty response

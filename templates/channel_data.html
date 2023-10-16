@@ -26,7 +26,10 @@
             height: auto;
         }
     </style>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- JavaScript for testing -->
 </head>
+
 <body>
 
     <!-- Display the channel thumbnail -->
@@ -37,8 +40,30 @@
     <p>Total views: {{ total_views }}</p>
     <p>Total videos: {{ total_videos }}</p>
     <p>Average views per video: {{ average_views_per_video }}</p>
+     <!--Realtime video data-->
+     <h3>Current most-viewed videos</h3>
+     <table>
+         <thead>
+             <tr>
+                 <th>Thumbnail</th>
+                 <th>Title</th>
+                 <th>Estimated realtime (48 hours) views</th>
+                 <th>Published date</th> 
+             </tr>
+         </thead>
+         {% for video in realtime_df_as_dict[:15] %}
+             <tr>
+                 <td>
+                     <img src="http://img.youtube.com/vi_webp/{{ video['video_id'] }}/default.webp" alt="Video Thumbnail">
+                 </td>
+                 <td>{{ video['title'] }}</td>
+                 <td>{{ video['realtime_views_estimate'] }}</td>
+                 <td>{{ video['published_date'] }}</td>
+             </tr>
+         {% endfor %}
+    </table>
     <!--Table of video data -->
-    <h3>Top all-time videos</h3>
+    <h3>Top 15 all-time videos</h3>
     <table>
         <thead>
             <tr>
@@ -46,52 +71,27 @@
                 <th>Title</th>
                 <th>Views</th>
                 <th>Duration</th>
+                <th>Percent of total views</th>
                 <th>Published Date</th>
             </tr>
         </thead>
         <tbody>
-            {% for video in channel_data %}  
+            {% for video in channel_data[:15] %}  
                 <tr>
                     <td>
-                        <img src="http://img.youtube.com/vi_webp/{{ video[4] }}/default.webp" alt="Video Thumbnail">
+                        <img src="http://img.youtube.com/vi_webp/{{ video[5] }}/default.webp" alt="Video Thumbnail">
                     </td>
                     <td>{{ video[0] }}</td>
                     <td>{{ video[1] }}</td>
                     <td>{{ video[2] }}</td>
                     <td>{{ video[3] }}</td>
+                    <td>{{ video[4] }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
-    <!--Table of realtime video data-->
-    <h3>Current most-viewed videos</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Thumbnail</th>
-                <th>Title</th>
-                <th>Views (last 48 hours)</th>
-                <th>Duration</th>
-                <th>Published Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for video in real_time_data %}
-            <tr>
-                <td>
-                    <img src="http://img.youtube.com/vi_webp/{{ video[4] }}/default.webp" alt="Video Thumbnail">
-                </td>
-                <td>{{ video[0] }}</td>
-                <td>{{ video[1] }}</td>
-                <td>{{ video[2] }}</td>
-                <td>{{ video[3] }}</td>
-                <td>{{ video[4] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
     <!--Table of most recent videos-->
-    <h3>Recent uploads</h3>
+    <h3>Fifteen most-recent uploads</h3>
     <table>
         <thead>
             <tr>
@@ -103,15 +103,14 @@
             </tr>
         </thead>
         <tbody>
-            {% for video in recent_data %}
+            {% for video in recent_data[:15] %}
             <tr>
                 <td>
-                    <img src="http://img.youtube.com/vi_webp/{{ video[4] }}/default.webp" alt="Video Thumbnail">
+                    <img src="http://img.youtube.com/vi_webp/{{ video[5] }}/default.webp" alt="Video Thumbnail">
                 </td>
                 <td>{{ video[0] }}</td>
                 <td>{{ video[1] }}</td>
                 <td>{{ video[2] }}</td>
-                <td>{{ video[3] }}</td>
                 <td>{{ video[4] }}</td>
             </tr>
             {% endfor %}
