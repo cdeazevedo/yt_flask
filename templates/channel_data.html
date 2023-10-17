@@ -26,8 +26,6 @@
             height: auto;
         }
     </style>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <!-- JavaScript for testing -->
 </head>
 
 <body>
@@ -40,6 +38,7 @@
     <p>Total views: {{ total_views }}</p>
     <p>Total videos: {{ total_videos }}</p>
     <p>Average views per video: {{ average_views_per_video }}</p>
+    <p>Views last 48 hours: {{ realtime_total }}</p>
      <!--Realtime video data-->
      <h3>Current most-viewed videos</h3>
      <table>
@@ -57,7 +56,7 @@
                      <img src="http://img.youtube.com/vi_webp/{{ video['video_id'] }}/default.webp" alt="Video Thumbnail">
                  </td>
                  <td>{{ video['title'] }}</td>
-                 <td>{{ video['realtime_views_estimate'] }}</td>
+                 <td>{{ video['realtime_total'] }}</td>
                  <td>{{ video['published_date'] }}</td>
              </tr>
          {% endfor %}
