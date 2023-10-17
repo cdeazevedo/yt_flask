@@ -189,8 +189,8 @@ def get_channel_data(channel_id):
             grouped['realtime_views_estimate']  = grouped['change_in_views_per_hour'] * 48
             grouped.sort_values('realtime_views_estimate', inplace=True, ascending=False)
             realtime_df = grouped[['video_id', 'title', 'published_date', 'realtime_views_estimate']]
+            realtime_total = '{:,}'.format(round(realtime_df['realtime_views_estimate'].sum(),0))
             realtime_df_as_dict = realtime_df.to_dict(orient='records')
-            print(realtime_df[:0])
             print(realtime_df_as_dict[0])
             for item in realtime_df_as_dict:
                 item['realtime_views_estimate'] = '{:,}'.format(round(item['realtime_views_estimate'],0))
@@ -214,7 +214,8 @@ def get_channel_data(channel_id):
             total_videos=total_videos,
             average_views_per_video=average_views_per_video,
             recent_data=recent_data,
-            realtime_df_as_dict = realtime_df_as_dict
+            realtime_df_as_dict = realtime_df_as_dict,
+            realtime_total = realtime_total
         )
     else:
         # If no data is available, return a message or an empty response
