@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request
 import mysql.connector
 from config import create_db_connection, YT_API_KEY
-import requests
 from googleapiclient.discovery import build
 import datetime
 import pandas as pd
@@ -68,7 +67,7 @@ def confirm_track():
         
     finally:
         connection.close()
-    return f"Now tracking: {channel_name} (channel id: {channel_id}).\n <a href='/search'>Back</a>"
+    return f"Now tracking: {channel_name} (channel id: {channel_id}). <br/> <a href='/search'>Back</a>"
 
 @application.route('/channels')
 def channels():
@@ -121,6 +120,18 @@ def get_channel_data(channel_id):
             cursor.execute(sql_query, (channel_id,))
             channel_data = cursor.fetchall()
             total_videos = len(channel_data)
+            
+            ## Create some charts about video statistics
+            # # Generate the figure **without using pyplot**.
+            # fig = Figure()
+            # ax = fig.subplots()
+            # ax.plot([1, 2])
+            # # Save it to a temporary buffer.
+            # buf = BytesIO()
+            # fig.savefig(buf, format="png")
+            # # Embed the result in the html output.
+            # data = base64.b64encode(buf.getbuffer()).decode("ascii")
+            
             
             views_sql_query = '''
             SELECT SUM(vv.views)
@@ -191,7 +202,7 @@ def get_channel_data(channel_id):
             realtime_df = grouped[['video_id', 'title', 'published_date', 'realtime_views_estimate']]
             realtime_total = '{:,}'.format(round(realtime_df['realtime_views_estimate'].sum(),0))
             realtime_df_as_dict = realtime_df.to_dict(orient='records')
-            print(realtime_df_as_dict[0])
+            #print(realtime_df_as_dict[0])
             for item in realtime_df_as_dict:
                 item['realtime_views_estimate'] = '{:,}'.format(round(item['realtime_views_estimate'],0))
             ## recent uploads
@@ -220,21 +231,6 @@ def get_channel_data(channel_id):
     else:
         # If no data is available, return a message or an empty response
         return "No data available for this channel. Try again later."
-
-@application.route("/db_test", methods=['GET', 'POST'])
-def db_test():
-    if request.method == 'POST':
-        try:
-            # Attempt to establish a database connection
-            db_connection = create_db_connection()
-            db_connection.close()
-            result = "Database connection successful!"
-        except mysql.connector.Error as err:
-            result = f"Database connection error: {err}"
-    else:
-        result = None  # No result initially for GET requests
-
-    return render_template("test.html", result=result)
 
 if __name__ == "__main__":
     application.run(debug=True)

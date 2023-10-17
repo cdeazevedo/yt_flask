@@ -40,7 +40,7 @@
     <p>Average views per video: {{ average_views_per_video }}</p>
     <p>Views last 48 hours: {{ realtime_total }}</p>
      <!--Realtime video data-->
-     <h3>Current most-viewed videos</h3>
+     <h1>Current most-viewed videos</h1>
      <table>
          <thead>
              <tr>
@@ -61,8 +61,10 @@
              </tr>
          {% endfor %}
     </table>
+    <!-- <h3>Some statistics</h3>
+    <img src="data:image/png;base64,{{ published_plot }}" alt="Embedded Image" /> -->
     <!--Table of video data -->
-    <h3>Top 15 all-time videos</h3>
+    <h1>Top 15 all-time videos</h1>
     <table>
         <thead>
             <tr>
@@ -90,7 +92,7 @@
         </tbody>
     </table>
     <!--Table of most recent videos-->
-    <h3>Fifteen most-recent uploads</h3>
+    <h1>Fifteen most-recent uploads</h1>
     <table>
         <thead>
             <tr>
