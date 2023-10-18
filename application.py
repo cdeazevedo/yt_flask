@@ -4,9 +4,6 @@ from config import create_db_connection, YT_API_KEY
 from googleapiclient.discovery import build
 import datetime
 import pandas as pd
-import base64
-from io import BytesIO
-from matplotlib.figure import Figure
 
 youtube_service = build('youtube','v3', developerKey=YT_API_KEY)
 
@@ -116,23 +113,10 @@ def get_channel_data(channel_id):
             ORDER BY vv.views DESC
             '''
             
-    
             cursor.execute(sql_query, (channel_id,))
             channel_data = cursor.fetchall()
             total_videos = len(channel_data)
-            
-            ## Create some charts about video statistics
-            # # Generate the figure **without using pyplot**.
-            # fig = Figure()
-            # ax = fig.subplots()
-            # ax.plot([1, 2])
-            # # Save it to a temporary buffer.
-            # buf = BytesIO()
-            # fig.savefig(buf, format="png")
-            # # Embed the result in the html output.
-            # data = base64.b64encode(buf.getbuffer()).decode("ascii")
-            
-            
+
             views_sql_query = '''
             SELECT SUM(vv.views)
             FROM videos as v 
@@ -192,8 +176,8 @@ def get_channel_data(channel_id):
             grouped = df.groupby('video_id', ).agg({
                 'change_in_views' : 'sum',
                 'change_in_timestamp_hours' : 'sum',
-                'title': 'first',  # Keep the first 'title' value
-                'published_date': 'first'  # Keep the first 'published_date' value
+                'title': 'first',  
+                'published_date': 'first'  
             }).reset_index()
             # Calculate real-time (48 hour) view estimate
             grouped['change_in_views_per_hour'] = grouped['change_in_views'] / grouped['change_in_timestamp_hours']
