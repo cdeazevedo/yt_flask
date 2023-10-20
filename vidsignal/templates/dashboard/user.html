@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Analytics{% endblock %}</h1>
+  <!-- Include the Plotly JavaScript library -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %} 
+
+{% block content %}
+    <div id="plotly-chart"></div>
+
+    <script>
+        var graphData = {{ graph_json|tojson|safe }};
+        Plotly.newPlot('plotly-chart', graphData.data, graphData.layout);
+    </script>
+{% endblock %}
+
+

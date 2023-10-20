@@ -1,5 +1,4 @@
 /flask_venv
-__pycache__
 config.py
 
 # Elastic Beanstalk Files
@@ -7,3 +6,14 @@ config.py
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 *.pyc
+__pycache__/
+
+instance/
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+dist/
+build/
+*.egg-info/
