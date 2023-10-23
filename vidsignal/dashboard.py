@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
+    Blueprint, flash, g, redirect, render_template, request, session, url_for, g
 )
 
 from vidsignal.db import get_db
@@ -12,13 +12,12 @@ import pandas as pd
 
 bp = Blueprint('dashboard', __name__)
 
-@bp.route('/guest')
-def guest():
-    return render_template('dashboard/guest.html')
-
-@bp.route('/user')
-@login_required
-def user():
+@bp.route('/dashboard')
+def dashboard():
+    if g.user:
+        logged_in=True
+    else:
+        logged_in=False
     df = pd.DataFrame({
         'Fruit': ['Apples', 'Oranges', 'Bananas', 'Apples', 'Oranges', 'Bananas'],
         'Amount': [4, 1, 2, 2, 4, 5],
@@ -30,4 +29,7 @@ def user():
     # Add more cities and colors as needed
     }
     df['Color'] = df['City'].map(color_mapping)
-    return render_template('dashboard/user.html', data=df.to_dict(orient='records'))
+    return render_template('dashboard/dashboard.html', 
+                           data=df.to_dict(orient='records'),
+                           logged_in=logged_in)
+

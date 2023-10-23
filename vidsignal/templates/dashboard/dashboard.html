@@ -4,6 +4,7 @@
   <h1>{% block title %}Analytics{% endblock %}</h1>
   <!-- Include the Plotly JavaScript library -->
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <h2>Welcome - {% if logged_in %}User{% else %}Guest{% endif %} </h2>
 {% endblock %} 
 
 {% block content %}

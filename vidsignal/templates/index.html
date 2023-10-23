@@ -9,13 +9,13 @@
 <div>
   <p>Welcome to VidSignal, your destination for competitive-analysis in the YouTube eco-system</p>
   {% if logged_in %}
-  <p>Go to <a href="{{ url_for('dashboard.user') }}">Dashboard</a>.</p>
+  <p>Go to <a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a>.</p>
   {% endif %}
   {% if not logged_in %}
   <p>Sign up or log in to start tracking channels and accessing premium features.</p>
   <p>Not a member yet? <a href="{{ url_for('auth.register') }}">Register now</a>!</p>
   <p>Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>!</p>
-  <p>Not ready to sign up? <a href="{{ url_for('dashboard.guest') }}">Check out</a> the trial version of our analytics platform!</p>
+  <p>Not ready to sign up? <a href="{{ url_for('dashboard.dashboard') }}">Check out</a> the trial version of our analytics platform!</p>
   {% endif %}
 </div>
 {% endblock %}
