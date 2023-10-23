@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, g
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -16,14 +16,14 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
-    
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
-    
+       
     @app.route('/')
     def index():
-        return render_template('index.html')
+        if g.user:
+            logged_in = True
+        else:
+            logged_in = False
+        return render_template('index.html', logged_in=logged_in)
     
     from . import db
     db.init_app(app)
