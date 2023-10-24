@@ -1,35 +1,35 @@
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for, g
+    Blueprint, g, render_template, g
 )
 
-from vidsignal.db import get_db
-from vidsignal.auth import login_required
+from vidsignal.db import get_channels, get_channel_data
 
-import json
-import plotly
-import plotly.express as px
 import pandas as pd
 
 bp = Blueprint('dashboard', __name__)
 
 @bp.route('/dashboard')
 def dashboard():
+    # This route is going to pull a bunch of data? Let's start with a list of 
+    # channels
+    # See if user is logged in or in guest mode
     if g.user:
         logged_in=True
     else:
         logged_in=False
-    df = pd.DataFrame({
-        'Fruit': ['Apples', 'Oranges', 'Bananas', 'Apples', 'Oranges', 'Bananas'],
-        'Amount': [4, 1, 2, 2, 4, 5],
-        'City': ['SF', 'SF', 'SF', 'Montreal', 'Montreal', 'Montreal']
-    })
-    color_mapping = {
-    'SF': 'blue',  # You can use any valid CSS color here
-    'Montreal': 'red',
-    # Add more cities and colors as needed
-    }
-    df['Color'] = df['City'].map(color_mapping)
+    # get some data dictionary ready
+    data = {}
+    # Get channel list
+    data['channels'] = get_channels()
+    
     return render_template('dashboard/dashboard.html', 
-                           data=df.to_dict(orient='records'),
-                           logged_in=logged_in)
+                           data=data,
+                           logged_in=logged_in,
+                           user=g.user)
 
+@bp.route('/dashboard/<selected_channel_id>')
+def dashboard_for_channel(selected_channel_id):
+    # channel_data = get_channel_data(selected_channel_id)
+    # print(channel_data)
+    print(selected_channel_id)
+    return f"{selected_channel_id}"

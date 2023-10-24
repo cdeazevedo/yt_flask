@@ -4,36 +4,35 @@
   <h1>{% block title %}Analytics{% endblock %}</h1>
   <!-- Include the Plotly JavaScript library -->
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <h2>Welcome - {% if logged_in %}User{% else %}Guest{% endif %} </h2>
+  <h2>Welcome - {% if logged_in %}{{g.user.username}}{% else %}Guest{% endif %}</h2>
 {% endblock %} 
 
 {% block content %}
-<div id="bar-chart"></div>
-  <script>
-    var data = {{ data | tojson | safe }};
-    var trace1 = {
-        x: data.map(d => d.Fruit),
-        y: data.map(d => d.Amount),
-        type: 'bar',
-        marker: {
-            color: data.map(d => d.Color),
-        },
-    };
-    
-    var layout = {
-        title: 'Fruit Amount by City',
-        xaxis: {
-            title: 'Fruit'
-        },
-        yaxis: {
-            title: 'Amount'
-        }
-    };
-    
-    var plotData = [trace1];
-    Plotly.newPlot('bar-chart', plotData, layout);
-  </script>
+<h1>Select a channel</h1>
+<select id="channelSelect">
+    {% for channel in data['channels'] %}
+    <option value="{{ channel['channel_id'] }}">{{channel.channel_name}}</option>
+    {% endfor %}
+</select>
 
+<script>
+   var channelSelect = document.getElementById("channelSelect");
+   // Add the listener 
+   channelSelect.addEventListener('change', function() {
+       var selectedChannel = channelSelect.value;
+       
+       // get the data
+       fetch('/dashboard/' + selectedChannel, {
+        method: 'GET',
+       })
+       .then(response => response.json())
+       .then(data => {
+          console.log(data);
+       })
+       .catch(error => console.error(error));
+
+   });
+   
+</script>
 {% endblock %}
-
 
