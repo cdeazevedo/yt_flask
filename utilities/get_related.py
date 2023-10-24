@@ -21,6 +21,10 @@ def getChannelData(channelIds):
     response=request.execute()
     return response
 
+def channelPublished(channelData):
+    """Get the channel published date from the API"""
+    return channelData['items'][0]['snippet']['publishedAt']
+
 def channelThumbnail(channelData):
     """Return thumbnail URI from channel data"""
     return channelData['items'][0]['snippet']['thumbnails']['default']['url']

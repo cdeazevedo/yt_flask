@@ -14,7 +14,8 @@
     <option value="{{ channel['channel_id'] }}">{{channel.channel_name}}</option>
     {% endfor %}
 </select>
-
+<h2>Channel Data</h2>
+<div id="channelData"></div>
 <script>
    var channelSelect = document.getElementById("channelSelect");
    // Add the listener 
@@ -22,17 +23,27 @@
        var selectedChannel = channelSelect.value;
        
        // get the data
-       fetch('/dashboard/' + selectedChannel, {
+       fetch('/dashboard/' + String(selectedChannel), {
         method: 'GET',
        })
        .then(response => response.json())
        .then(data => {
-          console.log(data);
+          console.log(selectedChannel);
+          displayChannelData(data);
        })
        .catch(error => console.error(error));
 
    });
    
+
+   function displayChannelData(data) {
+     var channelDataDiv = document.getElementById("channelData");
+     channelDataDiv.innerHTML = "";
+     var dataParagraph = document.createElement("p");
+     dataParagraph.textContent = "Channel Data: " + JSON.stringify(data);
+
+     channelDataDiv.appendChild(dataParagraph);
+   }
 </script>
 {% endblock %}
 

@@ -1,8 +1,8 @@
 from flask import (
-    Blueprint, g, render_template, g
+    Blueprint, g, render_template, g, jsonify
 )
 
-from vidsignal.db import get_channels, get_channel_data
+from vidsignal.db import get_channels, get_channel_videos, get_realtime_videos
 
 import pandas as pd
 
@@ -29,7 +29,9 @@ def dashboard():
 
 @bp.route('/dashboard/<selected_channel_id>')
 def dashboard_for_channel(selected_channel_id):
-    # channel_data = get_channel_data(selected_channel_id)
-    # print(channel_data)
-    print(selected_channel_id)
-    return f"{selected_channel_id}"
+    channel_data = {}
+    channel_data['videos'] = get_channel_videos(selected_channel_id)
+    channel_data['realtime'] = get_realtime_videos(selected_channel_id)
+    #print(channel_data)
+    #print(selected_channel_id)
+    return jsonify(channel_data)
