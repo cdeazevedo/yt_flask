@@ -14,10 +14,12 @@
     <option value="{{ channel['channel_id'] }}">{{channel.channel_name}}</option>
     {% endfor %}
 </select>
-<h2>Channel Data</h2>
+<h2 id="channelDataTitle" style="display: none">Channel Data</h2>
 <div id="channelData"></div>
 <script>
    var channelSelect = document.getElementById("channelSelect");
+   var channelDataTitle = document.getElementById("channelDataTitle");
+   
    // Add the listener 
    channelSelect.addEventListener('change', function() {
        var selectedChannel = channelSelect.value;
@@ -30,6 +32,9 @@
        .then(data => {
           console.log(selectedChannel);
           displayChannelData(data);
+
+          // Show the 'Channel Data' document.getElementById
+          channelDataTitle.style.display = 'block';
        })
        .catch(error => console.error(error));
 
