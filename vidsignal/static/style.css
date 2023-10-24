@@ -24,3 +24,41 @@ nav ul li a, nav ul li span, header .action { display: block; padding: 0.5rem; c
 content textarea { min-height: 12em; resize: vertical; }
 input.danger { color: #cc2f2e; }
 input[type=submit] { align-self: start; min-width: 10em; }
+/* Style for the channel information row */
+#channelData {
+    display: none;
+    align-items: flex-start;
+    border: 1px solid #ccc;
+    padding: 10px;
+  }
+  
+  .thumbnail {
+    margin-right: 20px;
+  }
+  
+  /* Remove the border from the image */
+  .thumbnail img {
+    border: none;
+  }
+  
+  .info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .title-info, .stats-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .channel-info {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  #channelData.active {
+    display: flex; /* Display the container when it has the 'active' class */
+  }

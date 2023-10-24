@@ -21,10 +21,34 @@
 </select>
 <h2 id="channelDataTitle" style="display: none">Channel Data</h2>
 <div id="channelData">
-  <p class="channel-info"><strong>Channel name:</strong> <span id="channelName"></span></p>
-  <p class="channel-info"><strong>Published date:</strong> <span id="publishedDate"></span></p>
-  <img class="channel-info" id="thumbnailImage" src="" alt="Channel Thumbnail" style="max-width: 300px;">  
+  <div class="thumbnail">
+    <img class="channel-info" id="thumbnailImage" src="" alt="Channel Thumbnail" style="max-width: 300px;">
+  </div>
+  <div class="info">
+    <div class="title-info">
+      <div class="channel-info">
+        <strong>Channel name:</strong> <span id="channelName"></span>
+      </div>
+      <div class="channel-info">
+        <strong>Published date:</strong> <span id="publishedDate"></span>
+      </div>
+    </div>
+    <div class="stats-info">
+      <div class="channel-info">
+        <strong>Total views:</strong> <span id="totalViews"></span>
+      </div>
+      <div class="channel-info">
+        <strong>Total videos:</strong> <span id="totalVideos"></span>
+      </div>
+      <div class="channel-info">
+        <strong>Average views per video:</strong> <span id="averageViews"></span>
+      </div>
+    </div>
+  </div>
 </div>
+
+
+
 
 <script>
     var channelInfoElements = document.querySelectorAll(".channel-info");
@@ -33,14 +57,16 @@
     }); 
     var channelSelect = document.getElementById("channelSelect");
     var channelDataTitle = document.getElementById("channelDataTitle");
-
+    var totalVideos;
+    var totalViews;
+    var averageViews;
    // Add the listener 
    channelSelect.addEventListener('change', function() {
        var selectedChannel = channelSelect.value;
        
-       displayChannelData();
+       
        channelInfoElements.forEach(function(element) {
-        element.style.display = "block";
+       element.style.display = "block";
       });
       
        // get the data
@@ -49,13 +75,23 @@
        })
        .then(response => response.json())
        .then(data => {
-          console.log(selectedChannel);         
+          console.log(selectedChannel);    
+          console.log(data);    
+          var videos = data.videos;
+          totalVideos = videos.length;
+          totalViews = videos.reduce((total, video) => total + video.views, 0);
+          averageViews = totalViews / totalVideos;
+          // Round the result down to the nearest integer
+          averageViews = Math.floor(averageViews);
+          ///console.log(totalViews);
+          displayChannelData();
+
        })
        .catch(error => console.error(error));
 
    });
    
-   /// this handles showing data that comes in
+   /// this handles showing channel data that comes in
    function displayChannelData() {
       var channelDataDiv = document.getElementById("channelData");
       var channelSelect = document.getElementById("channelSelect");
@@ -63,7 +99,9 @@
       var channelNameElement = document.getElementById("channelName");
       var publishedDateElement = document.getElementById("publishedDate");
       var thumbnailImageElement = document.getElementById("thumbnailImage");
-    
+      var totalViewsElement = document.getElementById("totalViews");
+      var totalVideosElement = document.getElementById("totalVideos");
+      var averageViewsElement = document.getElementById("averageViews");
       // Get data from the selected option's data attributes
       var channelName = selectedOption.getAttribute("data-channel-name");
       var publishedDate = selectedOption.getAttribute("data-published-date");
@@ -73,9 +111,14 @@
       channelNameElement.textContent = channelName;
       publishedDateElement.textContent = publishedDate;
       thumbnailImageElement.src = thumbnailUri;
+      totalVideosElement.textContent = totalVideos.toLocaleString();
+      totalViewsElement.textContent = totalViews.toLocaleString();
+      averageViewsElement.textContent = averageViews.toLocaleString();
+
     
       // Show the 'Channel Data' element
       channelDataTitle.style.display = 'block';
+      channelData.style.display = 'block';
   }
 
 </script>
