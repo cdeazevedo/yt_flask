@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h2>VidSignal: Your source for competitive-analysis on YouTube</h2>
+  <h2>VidSignal: Your source for competitive-analysis on the YouTube ecosystem</h2>
 {% endblock %}
 
 {% block content %}
 <div>
-  <p>Welcome to VidSignal, your destination for competitive-analysis in the YouTube eco-system</p>
   {% if logged_in %}
   <p>Go to <a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a>.</p>
   {% endif %}

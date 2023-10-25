@@ -8,8 +8,9 @@
 {% endblock %} 
 
 {% block content %}
-<h1>Select a channel</h1>
+<h2>Select a channel</h2>
 <select id="channelSelect">
+  <option value="" disabled selected>Channel List</option>
   {% for channel in data['channels'] %}
   <option value="{{ channel['channel_id'] }}"
           data-channel-name="{{ channel['name'] }}"
@@ -50,6 +51,9 @@
   </div>
 </div>
 
+<!-- Upload frequency plot -->
+<div id="uploadFrequencyPlot"></div>
+
 <!-- Realtime Data display-->
 <div id="topVideos" style="display:none">
   <h2>Top 10 realtime videos</h2>
@@ -57,9 +61,9 @@
     <thead>
       <tr>
         <th>Thumbnail</th>
-        <th>Video Title</th>
-        <th>Published Date</th>
-        <th>Views per Day (avg)</th>
+        <th>Title</th>
+        <th>Published date</th>
+        <th>Views per day (avg)</th>
       </tr>
     </thead>
     <tbody>
@@ -95,10 +99,43 @@
        .then(response => response.json())
        .then(data => {
           console.log(selectedChannel);    
-      
+          console.log(data);
           var videos = data.videos;
           var realtime = data.realtime;
           var topVideos = data.realtime;
+          // Data for plotting frequency
+          var months = data.upload_frequency.map(entry => {
+            // Parse the published_date as a Date object
+            const date = new Date(entry.published_date);
+        
+            // Create a formatted string in "MM-YYYY" format
+            const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+        
+            return formattedDate;
+          });
+          var uploadCounts = data.upload_frequency.map(entry => entry.uploads);
+          // Create a trace for the time series plot
+          var trace = {
+            x: months,
+            y: uploadCounts,
+            mode: 'lines+markers',
+            type: 'scatter',
+          };
+
+          // Create the layout for the plot
+          var layout = {
+            title: 'Video Upload Frequency Over Time',
+            xaxis: {
+              title: 'Month-Year',
+              tickangle: -45, // Rotate x-axis labels for readability
+            },
+            yaxis: {
+              title: 'Number of Videos',
+            },
+          };
+
+// Create the plot in the specified div element
+Plotly.newPlot('uploadFrequencyPlot', [trace], layout);
           totalVideos = videos.length;
           totalViews = videos.reduce((total, video) => total + video.views, 0);
           totalDailyViews = realtime.reduce((total, video) => total + video.views_per_day, 0);
