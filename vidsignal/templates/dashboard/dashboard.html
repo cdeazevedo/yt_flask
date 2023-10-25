@@ -50,8 +50,19 @@
 <!-- Realtime Data display-->
 <div id="topVideos" style="display:none">
   <h2>Top 10 realtime videos</h2>
-  <ul id="topVideoList">
-  </ul>
+  <table id="topVideoTable">
+    <thead>
+      <tr>
+        <th>Thumbnail</th>
+        <th>Video Title</th>
+        <th>Published Date</th>
+        <th>Views per Day (avg)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Here, dynamically add rows for each video -->
+    </tbody>
+  </table>
 </div>
 
 
@@ -91,18 +102,41 @@
           averageViews = Math.floor(averageViews);
           ///console.log(totalViews);
           
-          var topVideoList = document.getElementById('topVideoList');
-          topVideoList.innerHTML = '';
+          // Get a reference to the table body
+          var topVideoTable = document.getElementById('topVideoTable').getElementsByTagName('tbody')[0];
+          var topVideosDiv = document.getElementById('topVideos');
+          
+          // Add the new data
           topVideos.forEach(function(video) {
-            var listItem = document.createElement('li');
-            listItem.textContent = `${video.title} - Views per day: ${video.views_per_day}`;
-            console.log(video.title)
-            topVideoList.appendChild(listItem);
+            // Create a new row for each video
+            var row = topVideoTable.insertRow();
+
+            // Create and populate cells
+            var thumbnailCell = row.insertCell(0);
+            var titleCell = row.insertCell(1);
+            var dateCell = row.insertCell(2);
+            var viewsCell = row.insertCell(3);
+
+            // Create the thumbnail image
+            var thumbnailImage = document.createElement('img');
+            thumbnailImage.className = 'video-thumbnail';
+            thumbnailImage.src = `https://img.youtube.com/vi_webp/${video.video_id}/default.webp`;
+            thumbnailImage.alt = 'Video Thumbnail';
+
+            // Set video title, published date, and views per day
+            titleCell.textContent = video.title;
+
+            var date = new Date(video.published_date);
+            dateCell.textContent = date.toISOString().split('T')[0];  // Format to YYYY-MM-DD
+
+            viewsCell.textContent = Math.round(video.views_per_day).toLocaleString();  // Round views
+
+            // Append the thumbnail image to the thumbnail cell
+            thumbnailCell.appendChild(thumbnailImage);
           });
 
-          // Make it visible
-          var topVideos = document.getElementById('topVideos');
-          topVideos.style.display = 'block';
+          // Make the table visible
+          topVideosDiv.style.display = 'block';
 
 
           displayChannelData();

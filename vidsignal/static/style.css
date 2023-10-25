@@ -62,3 +62,15 @@ input[type=submit] { align-self: start; min-width: 10em; }
   #channelData.active {
     display: flex; /* Display the container when it has the 'active' class */
   }
+
+  /* Add borders to the table and cells */
+#topVideoTable {
+  border-collapse: collapse;
+  border: 2px solid #1877f2;
+  width: 100%;
+}
+
+#topVideoTable th, #topVideoTable td {
+  border: 1px solid #1877f2;
+  padding: 8px;
+}
