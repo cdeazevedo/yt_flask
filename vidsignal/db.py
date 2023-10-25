@@ -74,4 +74,3 @@ def get_realtime_videos(channel_id):
     column_names = [desc[0] for desc in crsr.description]
     video_list = [dict(zip(column_names, row)) for row in videos]
     return video_list
-

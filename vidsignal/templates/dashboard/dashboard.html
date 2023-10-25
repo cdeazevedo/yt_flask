@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Analytics{% endblock %}</h1>
+  <h1 style="color:#1877f2">{% block title %}Channel Analytics{% endblock %}</h1>
   <!-- Include the Plotly JavaScript library -->
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <h2>Welcome - {% if logged_in %}{{g.user.username}}{% else %}Guest{% endif %}</h2>
@@ -20,6 +20,7 @@
   {% endfor %}
 </select>
 <h2 id="channelDataTitle" style="display: none">Channel Data</h2>
+<!--Channel Data -->
 <div id="channelData">
   <div class="thumbnail">
     <img class="channel-info" id="thumbnailImage" src="" alt="Channel Thumbnail" style="max-width: 300px;">
@@ -46,8 +47,12 @@
     </div>
   </div>
 </div>
-
-
+<!-- Realtime Data display-->
+<div id="topVideos" style="display:none">
+  <h2>Top 10 realtime videos</h2>
+  <ul id="topVideoList">
+  </ul>
+</div>
 
 
 <script>
@@ -78,12 +83,28 @@
           console.log(selectedChannel);    
           console.log(data);    
           var videos = data.videos;
+          var topVideos = data.top_10_videos;
           totalVideos = videos.length;
           totalViews = videos.reduce((total, video) => total + video.views, 0);
           averageViews = totalViews / totalVideos;
           // Round the result down to the nearest integer
           averageViews = Math.floor(averageViews);
           ///console.log(totalViews);
+          
+          var topVideoList = document.getElementById('topVideoList');
+          topVideoList.innerHTML = '';
+          topVideos.forEach(function(video) {
+            var listItem = document.createElement('li');
+            listItem.textContent = `${video.title} - Views per day: ${video.views_per_day}`;
+            console.log(video.title)
+            topVideoList.appendChild(listItem);
+          });
+
+          // Make it visible
+          var topVideos = document.getElementById('topVideos');
+          topVideos.style.display = 'block';
+
+
           displayChannelData();
 
        })
