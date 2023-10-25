@@ -19,14 +19,15 @@ def process_realtime_data(video_list):
     df = df.dropna()
     # convert to daily views
     df['views_per_day'] = df['new_views'] / (df['time_elapsed'] / (60 * 60 *24))
-    top_10_videos = df.groupby('video_id').agg({
+    data = df.groupby('video_id').agg({
         'views_per_day': 'mean',
         'title': 'first',
         'published_date': 'first'
-    }).nlargest(10, 'views_per_day').reset_index()
-    data = df.to_dict(orient='records')
-    top_10_videos = top_10_videos.to_dict(orient='records')
-    return data, top_10_videos
+    }).reset_index()
+    data = data.sort_values(by='views_per_day', ascending=False)
+    data = data.to_dict(orient='records')
+    
+    return data
 
 @bp.route('/dashboard')
 def dashboard():
@@ -51,9 +52,6 @@ def dashboard():
 def dashboard_for_channel(selected_channel_id):
     channel_data = {}
     channel_data['videos'] = get_channel_videos(selected_channel_id)
-    realtime_data, top_10_vides = process_realtime_data(get_realtime_videos(selected_channel_id))
+    realtime_data = process_realtime_data(get_realtime_videos(selected_channel_id))
     channel_data['realtime'] = realtime_data
-    channel_data['top_10_videos'] = top_10_vides
-    #print(channel_data)
-    #print(selected_channel_id)
     return jsonify(channel_data)

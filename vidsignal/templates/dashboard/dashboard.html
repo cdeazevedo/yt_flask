@@ -20,7 +20,6 @@
   {% endfor %}
 </select>
 <h2 id="channelDataTitle" style="display: none">Channel Data</h2>
-<!--Channel Data -->
 <div id="channelData">
   <div class="thumbnail">
     <img class="channel-info" id="thumbnailImage" src="" alt="Channel Thumbnail" style="max-width: 300px;">
@@ -28,25 +27,29 @@
   <div class="info">
     <div class="title-info">
       <div class="channel-info">
-        <strong>Channel name:</strong> <span id="channelName"></span>
+        <strong>Channel:</strong> <span id="channelName"></span>
       </div>
       <div class="channel-info">
         <strong>Published date:</strong> <span id="publishedDate"></span>
       </div>
+      <div class="channel-info">
+        <strong>Lifetime views:</strong> <span id="totalViews"></span>
+      </div>
     </div>
     <div class="stats-info">
-      <div class="channel-info">
-        <strong>Total views:</strong> <span id="totalViews"></span>
-      </div>
       <div class="channel-info">
         <strong>Total videos:</strong> <span id="totalVideos"></span>
       </div>
       <div class="channel-info">
         <strong>Average views per video:</strong> <span id="averageViews"></span>
       </div>
+      <div class="channel-info">
+        <strong>Current Daily Views:</strong> <span id="totalDailyViews"></span>
+      </div>
     </div>
   </div>
 </div>
+
 <!-- Realtime Data display-->
 <div id="topVideos" style="display:none">
   <h2>Top 10 realtime videos</h2>
@@ -92,22 +95,32 @@
        .then(response => response.json())
        .then(data => {
           console.log(selectedChannel);    
-          console.log(data);    
+      
           var videos = data.videos;
-          var topVideos = data.top_10_videos;
+          var realtime = data.realtime;
+          var topVideos = data.realtime;
           totalVideos = videos.length;
           totalViews = videos.reduce((total, video) => total + video.views, 0);
+          totalDailyViews = realtime.reduce((total, video) => total + video.views_per_day, 0);
           averageViews = totalViews / totalVideos;
           // Round the result down to the nearest integer
           averageViews = Math.floor(averageViews);
-          ///console.log(totalViews);
-          
+          totalDailyViews = Math.floor(totalDailyViews);
+    
+          var totalDailyViewsElement = document.getElementById('totalDailyViews');
+          totalDailyViewsElement.textContent = totalDailyViews.toLocaleString();
+          ;
           // Get a reference to the table body
           var topVideoTable = document.getElementById('topVideoTable').getElementsByTagName('tbody')[0];
           var topVideosDiv = document.getElementById('topVideos');
-          
+
+          // Clear the existing rows in the table
+          while (topVideoTable.firstChild) {
+            topVideoTable.removeChild(topVideoTable.firstChild);
+          }
+
           // Add the new data
-          topVideos.forEach(function(video) {
+          topVideos.slice(0, 10).forEach(function(video) {
             // Create a new row for each video
             var row = topVideoTable.insertRow();
 
