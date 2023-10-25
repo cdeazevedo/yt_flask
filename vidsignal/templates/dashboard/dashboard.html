@@ -133,9 +133,11 @@
               title: 'Number of Videos',
             },
           };
-
+          const config = {
+            displayModeBar: false, // this is the line that hides the bar.
+          };
 // Create the plot in the specified div element
-Plotly.newPlot('uploadFrequencyPlot', [trace], layout);
+        Plotly.newPlot('uploadFrequencyPlot', [trace], layout, config);
           totalVideos = videos.length;
           totalViews = videos.reduce((total, video) => total + video.views, 0);
           totalDailyViews = realtime.reduce((total, video) => total + video.views_per_day, 0);
@@ -172,9 +174,11 @@ Plotly.newPlot('uploadFrequencyPlot', [trace], layout);
             thumbnailImage.className = 'video-thumbnail';
             thumbnailImage.src = `https://img.youtube.com/vi_webp/${video.video_id}/default.webp`;
             thumbnailImage.alt = 'Video Thumbnail';
-
+            thumbnailImage.style.width = '80px';  
+            thumbnailImage.style.height=  '60px';
             // Set video title, published date, and views per day
             titleCell.textContent = video.title;
+            titleCell.innerHTML = `<a href="https://www.youtube.com/watch?v=${video.video_id}" target="_blank">${video.title}</a>`;
 
             var date = new Date(video.published_date);
             dateCell.textContent = date.toISOString().split('T')[0];  // Format to YYYY-MM-DD
