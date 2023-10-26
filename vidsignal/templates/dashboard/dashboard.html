@@ -54,6 +54,9 @@
 <!-- Upload frequency plot -->
 <div id="uploadFrequencyPlot"></div>
 
+<!-- Average views by published year plot -->
+<div id="averageViewByYearPlot"></div>
+
 <!-- Realtime Data display-->
 <div id="topVideos" style="display:none">
   <h2>Top 10 realtime videos</h2>
@@ -113,9 +116,9 @@
         
             return formattedDate;
           });
-          var uploadCounts = data.upload_frequency.map(entry => entry.uploads);
           // Create a trace for the time series plot
-          var trace = {
+          var uploadCounts = data.upload_frequency.map(entry => entry.uploads);
+          var frequency_plot_data = {
             x: months,
             y: uploadCounts,
             mode: 'lines+markers',
@@ -136,8 +139,39 @@
           const config = {
             displayModeBar: false, // this is the line that hides the bar.
           };
-// Create the plot in the specified div element
-        Plotly.newPlot('uploadFrequencyPlot', [trace], layout, config);
+          // Create the plot in the specified div element
+          Plotly.newPlot('uploadFrequencyPlot', [frequency_plot_data], layout, config);
+
+          // Create barplot of views by upload year 
+          var viewCounts = data.average_views.map(entry => entry.views);
+          var year = data.average_views.map(entry => {
+            // Parse the published_date as a Date object
+            const date = new Date(entry.published_date);
+        
+            // Create a formatted string in "MM-YYYY" format
+            const year = date.getFullYear();
+        
+            return year;
+          });
+          var view_plot_data = {
+            x: year,
+            y: viewCounts,
+            type: 'bar',
+            orientation: 'v'
+          }
+          var view_layout = {
+            title: 'Average Video Views by Published Year',
+            xaxis: {
+              title: 'Year',
+            },
+            yaxis: {
+              title: 'Average Views',
+            },
+          };
+          Plotly.newPlot('averageViewByYearPlot', [view_plot_data], view_layout, config);
+
+
+
           totalVideos = videos.length;
           totalViews = videos.reduce((total, video) => total + video.views, 0);
           totalDailyViews = realtime.reduce((total, video) => total + video.views_per_day, 0);

@@ -18,3 +18,4 @@ dist/
 build/
 *.egg-info/
 helpers/
+script_log.txt

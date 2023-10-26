@@ -14,6 +14,15 @@ from utilities.get_related import (
     videoDescription,
     duration    
 )
+import logging
+
+# Configure the logger
+logging.basicConfig(filename='script_log.txt', level=logging.INFO)
+
+# Log information
+logging.info("Script started")
+
+
 
 api_service_name='youtube'
 api_version='v3'
@@ -67,9 +76,11 @@ for channel_id in channel_ids:
 
     # Commit the changes and close the cursor and connection
     conn.commit()
-
+    logging.info("Logged a channel")
 cursor.close()
 conn.close()
 
 print(f"Succesfully returned data for {len(channel_ids)} channel(s).")
+
+logging.info("Script completed")
 sys.exit(0)  # exits the script with an exit code of 0 (success)

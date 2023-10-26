@@ -6,6 +6,7 @@ from vidsignal.db import get_channels, get_channel_videos, get_realtime_videos
 import pandas as pd
 
 bp = Blueprint('dashboard', __name__)
+## Routes
 
 @bp.route('/dashboard')
 def dashboard():
@@ -31,10 +32,11 @@ def dashboard_for_channel(selected_channel_id):
     channel_data = {}
     videos = get_channel_videos(selected_channel_id)
     channel_data['videos'] = videos
-    channel_data['upload_frequency'] = create_upload_frequency(videos)
+    channel_data['upload_frequency'] = upload_frequency(videos)
     realtime_data = process_realtime_data(get_realtime_videos(selected_channel_id))
     channel_data['realtime'] = realtime_data
-    
+    channel_data['average_views'] = average_views_by_published_date(videos)
+
     return jsonify(channel_data)
 
 ## Functions for the dashboard
@@ -61,7 +63,8 @@ def process_realtime_data(video_list):
     
     return data
 
-def create_upload_frequency(video_list):
+def upload_frequency(video_list):
+    '''Take in current video list and calculate upload frequency by year/month to chart'''
     df = pd.DataFrame(video_list)
     df['published_date'] = pd.to_datetime(df['published_date'])
     df.set_index('published_date', inplace=True)
@@ -70,3 +73,21 @@ def create_upload_frequency(video_list):
     monthly_aggregated = monthly_aggregated.rename(columns={'video_id': 'uploads'})
     monthly_aggregated = monthly_aggregated.to_dict(orient='records')
     return monthly_aggregated
+
+def average_views_by_published_date(video_list):
+    '''Take in the current videos list and calculate average views by upload year to chart'''
+    df = pd.DataFrame(video_list)
+    df['published_date'] = pd.to_datetime(df['published_date'])
+    df.set_index('published_date', inplace=True)
+    #Ensure 'views' column only contains valid numeric values
+    df['views'] = pd.to_numeric(df['views'], errors='coerce')
+    
+    # Remove rows with NaN values in 'views' if needed
+    df = df.dropna(subset=['views'])
+    monthly_average_views = df.resample('Y')['views'].mean()
+    monthly_average_views = monthly_average_views.reset_index()
+    monthly_average_views = monthly_average_views.to_dict(orient='records')
+    return monthly_average_views
+    
+    
+    
