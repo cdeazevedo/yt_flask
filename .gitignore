@@ -9,7 +9,7 @@ config.py
 __pycache__/
 
 instance/
-
+deprecated/
 .pytest_cache/
 .coverage
 htmlcov/

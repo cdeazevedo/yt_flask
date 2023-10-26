@@ -52,21 +52,17 @@
 </div>
 
 <!-- Container for the plots -->
-<div id="plotContainer" style="display: flex;">
+<div id="plotContainer">
   <!-- Upload frequency plot -->
-  <div style="flex: 1;">
-      <div id="uploadFrequencyPlot"></div>
-  </div>
+  <div id="uploadFrequencyPlot" class="chart"></div>
 
   <!-- Average views by published year plot -->
-  <div style="flex: 1;">
-      <div id="averageViewByYearPlot"></div>
-  </div>
+  <div id="averageViewByYearPlot" class="chart"></div>
 </div>
 
 <!-- Realtime Data display-->
 <div id="topVideos" style="display:none">
-  <h2>Top 10 realtime videos</h2>
+  <h2>Top 10 Realtime Videos</h2>
   <table id="topVideoTable">
     <thead>
       <tr>
@@ -109,7 +105,7 @@
        .then(response => response.json())
        .then(data => {
           console.log(selectedChannel);    
-          console.log(data);
+          //console.log(data);
           var videos = data.videos;
           var realtime = data.realtime;
           var topVideos = data.realtime;

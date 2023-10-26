@@ -46,7 +46,7 @@ def get_channel_videos(channel_id):
                 SELECT MAX(timestamp) FROM video_views
                 WHERE video_id = v.video_id
             )
-    ORDER BY vv.views DESC
+    ORDER BY v.published_date DESC
     '''
     with cursor as crsr:
         crsr.execute(sql_query, (channel_id,))
@@ -64,7 +64,7 @@ def get_realtime_videos(channel_id):
     SELECT v.video_id, v.title, v.duration, v.published_date, vv.views, vv.timestamp
     FROM videos v
     LEFT JOIN video_views vv ON v.video_id = vv.video_id
-    WHERE v.channel_id = %s
+    WHERE v.channel_id = %s AND vv.views > 0
     ORDER BY v.video_id, vv.timestamp DESC
     '''
     with cursor as crsr:
@@ -82,7 +82,7 @@ def get_average_views_per_year(channel_id):
         SELECT YEAR(v.published_date) AS publication_year, AVG(vv.views) AS average_views
         FROM videos v
         LEFT JOIN video_views vv ON v.video_id = vv.video_id
-        WHERE v.channel_id = %s
+        WHERE v.channel_id = %s AND vv.views > 0
         AND vv.timestamp = (
             SELECT MAX(timestamp) FROM video_views 
             WHERE video_id = v.video_id
