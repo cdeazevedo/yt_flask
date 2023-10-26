@@ -1,10 +1,10 @@
 from flask import (
-    Blueprint, g, render_template, g, jsonify
+    Blueprint, g, render_template, g, jsonify, current_app
 )
 
-from vidsignal.db import get_channels, get_channel_videos, get_realtime_videos
+from vidsignal.db import get_channels, get_channel_videos, get_realtime_videos, get_average_views_per_year
 import pandas as pd
-
+app = current_app
 bp = Blueprint('dashboard', __name__)
 ## Routes
 
@@ -35,7 +35,7 @@ def dashboard_for_channel(selected_channel_id):
     channel_data['upload_frequency'] = upload_frequency(videos)
     realtime_data = process_realtime_data(get_realtime_videos(selected_channel_id))
     channel_data['realtime'] = realtime_data
-    channel_data['average_views'] = average_views_by_published_date(videos)
+    channel_data['average_views'] = prepare_data_for_graph(get_average_views_per_year(selected_channel_id))
 
     return jsonify(channel_data)
 
@@ -74,20 +74,25 @@ def upload_frequency(video_list):
     monthly_aggregated = monthly_aggregated.to_dict(orient='records')
     return monthly_aggregated
 
-def average_views_by_published_date(video_list):
-    '''Take in the current videos list and calculate average views by upload year to chart'''
-    df = pd.DataFrame(video_list)
-    df['published_date'] = pd.to_datetime(df['published_date'])
-    df.set_index('published_date', inplace=True)
-    #Ensure 'views' column only contains valid numeric values
-    df['views'] = pd.to_numeric(df['views'], errors='coerce')
+import pandas as pd
+
+def prepare_data_for_graph(sql_query_data):
+    # Convert the SQL query data into a DataFrame
+    df = pd.DataFrame(sql_query_data)
+    df['publication_year'] = pd.to_datetime(df['publication_year'], format='%Y', errors='coerce')
+    # Set the year as the index
+    df.set_index("publication_year", inplace=True)
+    # Resample the data to a yearly frequency
+    df = df.resample('Y').sum()
+    df["average_views"].fillna(0, inplace=True)
+    # Reset the index to prepare for graphing
+    df.reset_index(inplace=True)
+    df.rename(columns={"index": "year"}, inplace=True)
+    # Convert the DataFrame to a list of dictionaries
+    data_for_graph = df.to_dict(orient='records')
     
-    # Remove rows with NaN values in 'views' if needed
-    df = df.dropna(subset=['views'])
-    monthly_average_views = df.resample('Y')['views'].mean()
-    monthly_average_views = monthly_average_views.reset_index()
-    monthly_average_views = monthly_average_views.to_dict(orient='records')
-    return monthly_average_views
+    return data_for_graph
+
     
     
     

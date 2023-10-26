@@ -51,11 +51,18 @@
   </div>
 </div>
 
-<!-- Upload frequency plot -->
-<div id="uploadFrequencyPlot"></div>
+<!-- Container for the plots -->
+<div id="plotContainer" style="display: flex;">
+  <!-- Upload frequency plot -->
+  <div style="flex: 1;">
+      <div id="uploadFrequencyPlot"></div>
+  </div>
 
-<!-- Average views by published year plot -->
-<div id="averageViewByYearPlot"></div>
+  <!-- Average views by published year plot -->
+  <div style="flex: 1;">
+      <div id="averageViewByYearPlot"></div>
+  </div>
+</div>
 
 <!-- Realtime Data display-->
 <div id="topVideos" style="display:none">
@@ -128,6 +135,9 @@
           // Create the layout for the plot
           var layout = {
             title: 'Video Upload Frequency Over Time',
+            font: {
+              color: '#1877f2'
+            },
             xaxis: {
               title: 'Month-Year',
               tickangle: -45, // Rotate x-axis labels for readability
@@ -143,10 +153,10 @@
           Plotly.newPlot('uploadFrequencyPlot', [frequency_plot_data], layout, config);
 
           // Create barplot of views by upload year 
-          var viewCounts = data.average_views.map(entry => entry.views);
+          var viewCounts = data.average_views.map(entry => entry.average_views);
           var year = data.average_views.map(entry => {
             // Parse the published_date as a Date object
-            const date = new Date(entry.published_date);
+            const date = new Date(entry.publication_year);
         
             // Create a formatted string in "MM-YYYY" format
             const year = date.getFullYear();
@@ -161,6 +171,9 @@
           }
           var view_layout = {
             title: 'Average Video Views by Published Year',
+            font: {
+              color: '#1877f2'
+            },
             xaxis: {
               title: 'Year',
             },
