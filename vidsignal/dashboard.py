@@ -4,6 +4,7 @@ from flask import (
 
 from vidsignal.db import get_channels, get_channel_videos, get_realtime_videos, get_average_views_per_year
 import pandas as pd
+
 app = current_app
 bp = Blueprint('dashboard', __name__)
 ## Routes

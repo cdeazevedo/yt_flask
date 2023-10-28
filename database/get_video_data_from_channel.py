@@ -2,7 +2,7 @@ import sys
 from datetime import datetime
 import googleapiclient.discovery
 import googleapiclient.errors
-from config import create_db_connection, YT_API_KEY
+from . config import create_db_connection, YT_API_KEY
 from utilities.get_related import (
     getChannelData,
     getPlaylistIds,
@@ -76,7 +76,7 @@ for channel_id in channel_ids:
 
     # Commit the changes and close the cursor and connection
     conn.commit()
-    logging.info("Logged a channel")
+    logging.info(f"Logged a channel - {channel_id}")
 cursor.close()
 conn.close()
 

@@ -1,2 +1,8 @@
 /__pycache__
 /flask_venv
+/deprecated
+/helpers
+/instance
+/database
+README
+script_log.txt

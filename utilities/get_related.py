@@ -2,7 +2,7 @@ import googleapiclient.discovery
 import googleapiclient.errors
 from dateutil import parser
 from datetime import timedelta, datetime
-from config import YT_API_KEY
+from . config import YT_API_KEY
 
 api_service_name='youtube'
 api_version='v3'
