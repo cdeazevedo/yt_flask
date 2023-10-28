@@ -1,1 +1,1 @@
-web: gunicorn "vidsignal:create_app()"
+web: gunicorn wsgi:app
