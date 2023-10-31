@@ -35,27 +35,27 @@ def get_channels():
     channel_list = [dict(zip(column_names, row)) for row in channels]
     return channel_list
 
-def get_channel_videos(channel_id):
-    db = create_db_connection()
-    cursor = db.cursor()
-    sql_query='''
-    SELECT v.video_id, v.title, v.duration, v.published_date, vv.views
-    FROM videos v
-    LEFT JOIN video_views vv ON v.video_id = vv.video_id
-    WHERE v.channel_id = %s AND vv.views > 0
-    AND vv.timestamp = (
-                SELECT MAX(timestamp) FROM video_views
-                WHERE video_id = v.video_id
-            )
-    ORDER BY v.published_date DESC
-    '''
-    with cursor as crsr:
-        crsr.execute(sql_query, (channel_id,))
-        videos = crsr.fetchall()
-        crsr.close()
-    column_names = [desc[0] for desc in crsr.description]
-    video_list = [dict(zip(column_names, row)) for row in videos]
-    return video_list
+# def get_channel_videos(channel_id):
+#     db = create_db_connection()
+#     cursor = db.cursor()
+#     sql_query='''
+#     SELECT v.video_id, v.title, v.duration, v.published_date, vv.views
+#     FROM videos v
+#     LEFT JOIN video_views vv ON v.video_id = vv.video_id
+#     WHERE v.channel_id = %s AND vv.views > 0
+#     AND vv.timestamp = (
+#                 SELECT MAX(timestamp) FROM video_views
+#                 WHERE video_id = v.video_id
+#             )
+#     ORDER BY v.published_date DESC
+#     '''
+#     with cursor as crsr:
+#         crsr.execute(sql_query, (channel_id,))
+#         videos = crsr.fetchall()
+#         crsr.close()
+#     column_names = [desc[0] for desc in crsr.description]
+#     video_list = [dict(zip(column_names, row)) for row in videos]
+#     return video_list
 
 def get_realtime_videos(channel_id):
     """Return a list of videos for a channel to calculate realtime performance."""

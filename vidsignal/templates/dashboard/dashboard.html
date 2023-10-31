@@ -96,9 +96,9 @@
           .then(data => {
               //console.log(selectedChannel);
               //console.log(data);
-              var videos = data.videos;
-              var realtime = data.realtime;
-              var topVideos = data.realtime;
+              var videos = data.realtime;
+              //var realtime = data.realtime;
+              //var topVideos = data.realtime;
               // Data for plotting frequency
               var months = data.upload_frequency.map(entry => {
                   // Parse the published_date as a Date object
@@ -172,7 +172,7 @@
               // Calculate data for top of dasbhoard
               totalVideos = videos.length;
               totalViews = videos.reduce((total, video) => total + video.views, 0);
-              totalDailyViews = realtime.reduce((total, video) => total + video.views_per_day, 0);
+              totalDailyViews = videos.reduce((total, video) => total + video.views_per_day, 0);
               averageViews = totalViews / totalVideos;
               // Round the result down to the nearest integer
               averageViews = Math.floor(averageViews);
@@ -183,6 +183,11 @@
               ;
               // Create Top Video Table ---------------------------------------------------------------------------------------------
               // Get a reference to the topVideoTable body
+              // Check if the DataTable is already initialized
+              if ($.fn.DataTable.isDataTable('#topVideoTable')) {
+                // If it's already initialized, destroy the existing DataTable
+                $('#topVideoTable').DataTable().destroy();
+              }
               var topVideoTable = $('#topVideoTable').DataTable({
                 columnDefs: [
                   { targets: 0, orderable: false },
@@ -200,13 +205,14 @@
   
   
               // Add the new data
-              topVideos.forEach(function (video) {
+              videos.forEach(function (video) {
                   // Add a new row to the DataTable
                   topVideoTable.row.add([
                       `<img class="video-thumbnail" src="https://img.youtube.com/vi_webp/${video.video_id}/default.webp" alt="Video Thumbnail" style="width: 80px; height: 60px">`,
                       `<a href="https://www.youtube.com/watch?v=${video.video_id}" target="_blank">${video.title}</a>`,
                       (new Date(video.published_date)).toISOString().split('T')[0],  // Format to YYYY-MM-DD
-                      Math.round(video.views_per_day).toLocaleString()  // Round views
+                      Math.round(video.views_per_day).toLocaleString(),  // Round views per day
+                      Math.round(video.views).toLocaleString() // 
                   ]).draw();
               });
   
