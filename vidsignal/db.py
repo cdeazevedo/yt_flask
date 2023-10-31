@@ -1,5 +1,6 @@
 from flask import current_app, g
 from . config import create_db_connection
+import openai
 
 def get_db():
     if 'db' not in g:

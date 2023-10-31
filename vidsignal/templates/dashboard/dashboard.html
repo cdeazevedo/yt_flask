@@ -4,6 +4,7 @@
   <h1 style="color:#1877f2">{% block title %}Channel Analytics{% endblock %}</h1>
   <!-- Include the Plotly JavaScript library -->
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <!-- Include Data Table -->
   <h2>Welcome - {% if logged_in %}{{g.user.username}}{% else %}Guest{% endif %}</h2>
 {% endblock %} 
 
@@ -61,7 +62,7 @@
 </div>
 
 <!-- Realtime Data display-->
-{% include 'topVideos.html' %}
+{% include 'dashboard/topVideos.html' %}
 
 
 <script>
@@ -78,7 +79,6 @@
    channelSelect.addEventListener('change', function() {
        var selectedChannel = channelSelect.value;
        
-       
        channelInfoElements.forEach(function(element) {
        element.style.display = "block";
       });
@@ -91,7 +91,7 @@
        .then(data => {
           //console.log(selectedChannel);    
           //console.log(data);
-          var videos = data.videos;
+          var  videos = data.videos;
           var realtime = data.realtime;
           var topVideos = data.realtime;
           // Data for plotting frequency
@@ -187,7 +187,7 @@
           }
 
           // Add the new data
-          topVideos.slice(0, 10).forEach(function(video) {
+          topVideos.forEach(function(video) {
             // Create a new row for each video
             var row = topVideoTable.insertRow();
 
@@ -222,7 +222,7 @@
 
           //------------------------------END top video table creation ------------------------------------------
 
-          
+
 
           displayChannelData();
 

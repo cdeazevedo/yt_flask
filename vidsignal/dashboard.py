@@ -2,8 +2,11 @@ from flask import (
     Blueprint, g, render_template, g, jsonify, current_app
 )
 
-from vidsignal.db import get_channels, get_channel_videos, get_realtime_videos, get_average_views_per_year
 import pandas as pd
+import openai
+
+from vidsignal.db import get_channels, get_channel_videos, get_realtime_videos, get_average_views_per_year
+from . config import OPEN_AI_KEY
 
 app = current_app
 bp = Blueprint('dashboard', __name__)
@@ -37,6 +40,8 @@ def dashboard_for_channel(selected_channel_id):
     realtime_data = process_realtime_data(get_realtime_videos(selected_channel_id))
     channel_data['realtime'] = realtime_data
     channel_data['average_views'] = prepare_data_for_graph(get_average_views_per_year(selected_channel_id))
+    # send top 15 realtime videos to openai for summary
+    #channel_data['chatGPT_summary'] = get_chatgptsummary(realtime_data[:15])
 
     return jsonify(channel_data)
 
@@ -94,6 +99,25 @@ def prepare_data_for_graph(sql_query_data):
     
     return data_for_graph
 
+
+## Deal with Openai API
+def get_chatgptsummary(video_list):
+    """this queries OPEN ai chatgpt and asks for description of videos"""
+    openai.api_key = OPEN_AI_KEY
     
+    video_titles = [video['title'] for video in video_list]
+    video_descriptions = [video['description'] for video in video_list]
     
+    prompt = "Write a short answer to the question, what type of videos are these?:\n\n"
+    for title, description in zip(video_titles, video_descriptions):
+        prompt += f"Title: {title}\nDescription: {description}\n\n"
     
+    response = openai.Completion.create(
+        engine="text-davinci-002",
+        prompt=prompt,
+        max_tokens=150
+    )
+    
+    summary = response.choices[0].text
+    
+    return response
