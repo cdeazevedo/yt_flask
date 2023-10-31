@@ -2,9 +2,14 @@
 
 {% block header %}
   <h1 style="color:#1877f2">{% block title %}Channel Analytics{% endblock %}</h1>
+  <!-- Jquery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
   <!-- Include the Plotly JavaScript library -->
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <!-- Include Data Table -->
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <!-- Include DataTable styling -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
   <h2>Welcome - {% if logged_in %}{{g.user.username}}{% else %}Guest{% endif %}</h2>
 {% endblock %} 
 
@@ -66,173 +71,161 @@
 
 
 <script>
-    var channelInfoElements = document.querySelectorAll(".channel-info");
-    channelInfoElements.forEach(function(element) {
+  var channelInfoElements = document.querySelectorAll(".channel-info");
+  channelInfoElements.forEach(function (element) {
       element.style.display = "none";
-    }); 
-    var channelSelect = document.getElementById("channelSelect");
-    var channelDataTitle = document.getElementById("channelDataTitle");
-    var totalVideos;
-    var totalViews;
-    var averageViews;
-   // Add the listener 
-   channelSelect.addEventListener('change', function() {
-       var selectedChannel = channelSelect.value;
-       
-       channelInfoElements.forEach(function(element) {
-       element.style.display = "block";
+  });
+  var channelSelect = document.getElementById("channelSelect");
+  var channelDataTitle = document.getElementById("channelDataTitle");
+  var totalVideos;
+  var totalViews;
+  var averageViews;
+  // Add the listener 
+  channelSelect.addEventListener('change', function () {
+      var selectedChannel = channelSelect.value;
+  
+      channelInfoElements.forEach(function (element) {
+          element.style.display = "block";
       });
-      
-       // get the data
-       fetch('/dashboard/' + String(selectedChannel), {
-        method: 'GET',
-       })
-       .then(response => response.json())
-       .then(data => {
-          //console.log(selectedChannel);    
-          //console.log(data);
-          var  videos = data.videos;
-          var realtime = data.realtime;
-          var topVideos = data.realtime;
-          // Data for plotting frequency
-          var months = data.upload_frequency.map(entry => {
-            // Parse the published_date as a Date object
-            const date = new Date(entry.published_date);
-        
-            // Create a formatted string in "MM-YYYY" format
-            const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
-        
-            return formattedDate;
-          });
-          // Create a trace for the time series plot
-          var uploadCounts = data.upload_frequency.map(entry => entry.uploads);
-          var frequency_plot_data = {
-            x: months,
-            y: uploadCounts,
-            mode: 'lines+markers',
-            type: 'scatter',
-          };
-
-          // Create the layout for the plot
-          var layout = {
-            title: 'Video Upload Frequency Over Time',
-            font: {
-              color: '#1877f2'
-            },
-            xaxis: {
-              title: 'Month-Year',
-              tickangle: -45, // Rotate x-axis labels for readability
-            },
-            yaxis: {
-              title: 'Number of Videos',
-            },
-          };
-          const config = {
-            displayModeBar: false, // this is the line that hides the bar.
-          };
-          // Create the plot in the specified div element
-          Plotly.newPlot('uploadFrequencyPlot', [frequency_plot_data], layout, config);
-
-          // Create barplot of views by upload year 
-          var viewCounts = data.average_views.map(entry => entry.average_views);
-          var year = data.average_views.map(entry => {
-            // Parse the published_date as a Date object
-            const date = new Date(entry.publication_year);
-        
-            // Create a formatted string in "MM-YYYY" format
-            const year = date.getFullYear();
-        
-            return year;
-          });
-          var view_plot_data = {
-            x: year,
-            y: viewCounts,
-            type: 'bar',
-            orientation: 'v'
-          }
-          var view_layout = {
-            title: 'Average Video Views by Published Year',
-            font: {
-              color: '#1877f2'
-            },
-            xaxis: {
-              title: 'Year',
-            },
-            yaxis: {
-              title: 'Average Views',
-            },
-          };
-          Plotly.newPlot('averageViewByYearPlot', [view_plot_data], view_layout, config);
-
-          // Calculate data for top of dasbhoard
-          totalVideos = videos.length;
-          totalViews = videos.reduce((total, video) => total + video.views, 0);
-          totalDailyViews = realtime.reduce((total, video) => total + video.views_per_day, 0);
-          averageViews = totalViews / totalVideos;
-          // Round the result down to the nearest integer
-          averageViews = Math.floor(averageViews);
-          totalDailyViews = Math.floor(totalDailyViews);
-    
-          var totalDailyViewsElement = document.getElementById('totalDailyViews');
-          totalDailyViewsElement.textContent = totalDailyViews.toLocaleString();
-          ;
-          // Create Top Video Table ---------------------------------------------------------------------------------------------
-          // Get a reference to the topVideoTable body
-          var topVideoTable = document.getElementById('topVideoTable').getElementsByTagName('tbody')[0];
-          var topVideosDiv = document.getElementById('topVideos');
-
-          // Clear the existing rows in the table
-          while (topVideoTable.firstChild) {
-            topVideoTable.removeChild(topVideoTable.firstChild);
-          }
-
-          // Add the new data
-          topVideos.forEach(function(video) {
-            // Create a new row for each video
-            var row = topVideoTable.insertRow();
-
-            // Create and populate cells
-            var thumbnailCell = row.insertCell(0);
-            var titleCell = row.insertCell(1);
-            var dateCell = row.insertCell(2);
-            var viewsCell = row.insertCell(3);
-
-            // Create the thumbnail image
-            var thumbnailImage = document.createElement('img');
-            thumbnailImage.className = 'video-thumbnail';
-            thumbnailImage.src = `https://img.youtube.com/vi_webp/${video.video_id}/default.webp`;
-            thumbnailImage.alt = 'Video Thumbnail';
-            thumbnailImage.style.width = '80px';  
-            thumbnailImage.style.height=  '60px';
-            // Set video title, published date, and views per day
-            titleCell.textContent = video.title;
-            titleCell.innerHTML = `<a href="https://www.youtube.com/watch?v=${video.video_id}" target="_blank">${video.title}</a>`;
-
-            var date = new Date(video.published_date);
-            dateCell.textContent = date.toISOString().split('T')[0];  // Format to YYYY-MM-DD
-
-            viewsCell.textContent = Math.round(video.views_per_day).toLocaleString();  // Round views
-
-            // Append the thumbnail image to the thumbnail cell
-            thumbnailCell.appendChild(thumbnailImage);
-          });
-
-          // Make the table visible
-          topVideosDiv.style.display = 'block';
-
-          //------------------------------END top video table creation ------------------------------------------
-
-
-
-          displayChannelData();
-
-       })
-       .catch(error => console.error(error));
-
-   });
-   
-   /// this handles showing channel data that comes in
-   function displayChannelData() {
+  
+      // get the data
+      fetch('/dashboard/' + String(selectedChannel), {
+          method: 'GET',
+      })
+          .then(response => response.json())
+          .then(data => {
+              //console.log(selectedChannel);
+              //console.log(data);
+              var videos = data.videos;
+              var realtime = data.realtime;
+              var topVideos = data.realtime;
+              // Data for plotting frequency
+              var months = data.upload_frequency.map(entry => {
+                  // Parse the published_date as a Date object
+                  const date = new Date(entry.published_date);
+  
+                  // Create a formatted string in "MM-YYYY" format
+                  const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+  
+                  return formattedDate;
+              });
+              // Create a trace for the time series plot
+              var uploadCounts = data.upload_frequency.map(entry => entry.uploads);
+              var frequency_plot_data = {
+                  x: months,
+                  y: uploadCounts,
+                  mode: 'lines+markers',
+                  type: 'scatter',
+              };
+  
+              // Create the layout for the plot
+              var layout = {
+                  title: 'Video Upload Frequency Over Time',
+                  font: {
+                      color: '#1877f2'
+                  },
+                  xaxis: {
+                      title: 'Month-Year',
+                      tickangle: -45, // Rotate x-axis labels for readability
+                  },
+                  yaxis: {
+                      title: 'Number of Videos',
+                  },
+              };
+              const config = {
+                  displayModeBar: false, // this is the line that hides the bar.
+              };
+              // Create the plot in the specified div element
+              Plotly.newPlot('uploadFrequencyPlot', [frequency_plot_data], layout, config);
+  
+              // Create barplot of views by upload year 
+              var viewCounts = data.average_views.map(entry => entry.average_views);
+              var year = data.average_views.map(entry => {
+                  // Parse the published_date as a Date object
+                  const date = new Date(entry.publication_year);
+  
+                  // Create a formatted string in "MM-YYYY" format
+                  const year = date.getFullYear();
+  
+                  return year;
+              });
+              var view_plot_data = {
+                  x: year,
+                  y: viewCounts,
+                  type: 'bar',
+                  orientation: 'v'
+              }
+              var view_layout = {
+                  title: 'Average Video Views by Published Year',
+                  font: {
+                      color: '#1877f2'
+                  },
+                  xaxis: {
+                      title: 'Year',
+                  },
+                  yaxis: {
+                      title: 'Average Views',
+                  },
+              };
+              Plotly.newPlot('averageViewByYearPlot', [view_plot_data], view_layout, config);
+  
+              // Calculate data for top of dasbhoard
+              totalVideos = videos.length;
+              totalViews = videos.reduce((total, video) => total + video.views, 0);
+              totalDailyViews = realtime.reduce((total, video) => total + video.views_per_day, 0);
+              averageViews = totalViews / totalVideos;
+              // Round the result down to the nearest integer
+              averageViews = Math.floor(averageViews);
+              totalDailyViews = Math.floor(totalDailyViews);
+  
+              var totalDailyViewsElement = document.getElementById('totalDailyViews');
+              totalDailyViewsElement.textContent = totalDailyViews.toLocaleString();
+              ;
+              // Create Top Video Table ---------------------------------------------------------------------------------------------
+              // Get a reference to the topVideoTable body
+              var topVideoTable = $('#topVideoTable').DataTable({
+                columnDefs: [
+                  { targets: 0, orderable: false },
+                  { type: 'num-fmt', targets: 3 } // Assuming that the "Views" column is the fourth column (index 3)
+                ],
+                order: [[3, 'desc']],
+                ordering: true
+              });
+              var topVideosDiv = document.getElementById('topVideos');
+              top
+              // Clear the existing rows in the table
+              while (topVideoTable.rows().count() > 0) {
+                  topVideoTable.row(0).remove();
+              }
+  
+  
+              // Add the new data
+              topVideos.forEach(function (video) {
+                  // Add a new row to the DataTable
+                  topVideoTable.row.add([
+                      `<img class="video-thumbnail" src="https://img.youtube.com/vi_webp/${video.video_id}/default.webp" alt="Video Thumbnail" style="width: 80px; height: 60px">`,
+                      `<a href="https://www.youtube.com/watch?v=${video.video_id}" target="_blank">${video.title}</a>`,
+                      (new Date(video.published_date)).toISOString().split('T')[0],  // Format to YYYY-MM-DD
+                      Math.round(video.views_per_day).toLocaleString()  // Round views
+                  ]).draw();
+              });
+  
+              // Make the table visible
+              topVideosDiv.style.display = 'block';
+  
+              //------------------------------END top video table creation ------------------------------------------
+  
+  
+  
+              displayChannelData();
+  
+          })
+          .catch(error => console.error(error));
+  
+  });
+  
+  /// this handles showing channel data that comes in
+  function displayChannelData() {
       var channelDataDiv = document.getElementById("channelData");
       var channelSelect = document.getElementById("channelSelect");
       var selectedOption = channelSelect.options[channelSelect.selectedIndex];
@@ -246,7 +239,7 @@
       var channelName = selectedOption.getAttribute("data-channel-name");
       var publishedDate = selectedOption.getAttribute("data-published-date");
       var thumbnailUri = selectedOption.getAttribute("data-thumbnail-uri");
-    
+  
       // Update the placeholders with the selected channel's data
       channelNameElement.textContent = channelName;
       publishedDateElement.textContent = publishedDate;
@@ -254,13 +247,13 @@
       totalVideosElement.textContent = totalVideos.toLocaleString();
       totalViewsElement.textContent = totalViews.toLocaleString();
       averageViewsElement.textContent = averageViews.toLocaleString();
-
-    
+  
+  
       // Show the 'Channel Data' element
       channelDataTitle.style.display = 'block';
       channelData.style.display = 'block';
   }
-
+  
 </script>
 {% endblock %}
 
