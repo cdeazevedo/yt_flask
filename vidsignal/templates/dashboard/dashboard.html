@@ -2,15 +2,10 @@
 
 {% block header %}
   <h1 style="color:#1877f2">{% block title %}Channel Analytics{% endblock %}</h1>
-  <!-- Jquery -->
-  <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
   <!-- Include the Plotly JavaScript library -->
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <!-- Include Data Table -->
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-  <!-- Include DataTable styling -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
-  <h2>Welcome - {% if logged_in %}{{g.user.username}}{% else %}Guest{% endif %}</h2>
+   <!-- Jquery -->
+   <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 {% endblock %} 
 
 {% block content %}
@@ -26,6 +21,7 @@
   </option>
   {% endfor %}
 </select>
+
 <h2 id="channelDataTitle" style="display: none">Channel Data</h2>
 <div id="channelData">
   <div class="thumbnail">
@@ -66,9 +62,58 @@
   <div id="averageViewByYearPlot" class="chart"></div>
 </div>
 
-<!-- Realtime Data display-->
-{% include 'dashboard/topVideos.html' %}
+<!--             Top Video placeholders                     -->
+<div id="topVideos" style="display:none">
+  <h2>Hot videos</h2>
+  <!-- Top 10 Realtime videos  display-->
+  <table id="topRealtime">
+    <thead>
+      <tr>
+        <th>Thumbnail</th>
+        <th>Title</th>
+        <th>Published date</th>
+        <th>Recent daily views</th>
+        <th>Total Views</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Here, dynamically add rows for each video -->
+    </tbody>
+  </table>
 
+  <!-- Top 10 All-Time videos  display-->
+  <h2>All-time most popular videos</h2>
+  <table id="topAlltime">
+    <thead>
+      <tr>
+        <th>Thumbnail</th>
+        <th>Title</th>
+        <th>Published date</th>
+        <th>Recent daily views</th>
+        <th>Total Views</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Here, dynamically add rows for each video -->
+    </tbody>
+  </table>
+
+  <h2>Recent uploads</h2>
+  <table id="mostRecent">
+    <thead>
+      <tr>
+        <th>Thumbnail</th>
+        <th>Title</th>
+        <th>Published date</th>
+        <th>Recent daily views</th>
+        <th>Total Views</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Here, dynamically add rows for each video -->
+    </tbody>
+  </table>
+</div>
 
 <script>
   var channelInfoElements = document.querySelectorAll(".channel-info");
@@ -86,19 +131,16 @@
   
       channelInfoElements.forEach(function (element) {
           element.style.display = "block";
-      });
-  
-      // get the data
+      });    
+      // get the data   
       fetch('/dashboard/' + String(selectedChannel), {
           method: 'GET',
       })
+
           .then(response => response.json())
+
           .then(data => {
-              //console.log(selectedChannel);
-              //console.log(data);
               var videos = data.realtime;
-              //var realtime = data.realtime;
-              //var topVideos = data.realtime;
               // Data for plotting frequency
               var months = data.upload_frequency.map(entry => {
                   // Parse the published_date as a Date object
@@ -137,7 +179,6 @@
               };
               // Create the plot in the specified div element
               Plotly.newPlot('uploadFrequencyPlot', [frequency_plot_data], layout, config);
-  
               // Create barplot of views by upload year 
               var viewCounts = data.average_views.map(entry => entry.average_views);
               var year = data.average_views.map(entry => {
@@ -168,7 +209,6 @@
                   },
               };
               Plotly.newPlot('averageViewByYearPlot', [view_plot_data], view_layout, config);
-  
               // Calculate data for top of dasbhoard
               totalVideos = videos.length;
               totalViews = videos.reduce((total, video) => total + video.views, 0);
@@ -180,53 +220,21 @@
   
               var totalDailyViewsElement = document.getElementById('totalDailyViews');
               totalDailyViewsElement.textContent = totalDailyViews.toLocaleString();
-              ;
               // Create Top Video Table ---------------------------------------------------------------------------------------------
-              // Get a reference to the topVideoTable body
-              // Check if the DataTable is already initialized
-              if ($.fn.DataTable.isDataTable('#topVideoTable')) {
-                // If it's already initialized, destroy the existing DataTable
-                $('#topVideoTable').DataTable().destroy();
-              }
-              var topVideoTable = $('#topVideoTable').DataTable({
-                columnDefs: [
-                  { targets: 0, orderable: false },
-                  { type: 'num-fmt', targets: 3 } // Assuming that the "Views" column is the fourth column (index 3)
-                ],
-                order: [[3, 'desc']],
-                ordering: true
-              });
               var topVideosDiv = document.getElementById('topVideos');
-              top
-              // Clear the existing rows in the table
-              while (topVideoTable.rows().count() > 0) {
-                  topVideoTable.row(0).remove();
-              }
-  
-  
-              // Add the new data
-              videos.forEach(function (video) {
-                  // Add a new row to the DataTable
-                  topVideoTable.row.add([
-                      `<img class="video-thumbnail" src="https://img.youtube.com/vi_webp/${video.video_id}/default.webp" alt="Video Thumbnail" style="width: 80px; height: 60px">`,
-                      `<a href="https://www.youtube.com/watch?v=${video.video_id}" target="_blank">${video.title}</a>`,
-                      (new Date(video.published_date)).toISOString().split('T')[0],  // Format to YYYY-MM-DD
-                      Math.round(video.views_per_day).toLocaleString(),  // Round views per day
-                      Math.round(video.views).toLocaleString() // 
-                  ]).draw();
-              });
-  
-              // Make the table visible
-              topVideosDiv.style.display = 'block';
-  
+              // Sort and populate each table with the corresponding data
+              populateAndSortTable('topRealtime', videos, 'views_per_day');
+              populateAndSortTable('topAlltime', videos, 'views');
+              populateAndSortTable('mostRecent', videos, 'published_date');
+
+              // Make the tables visible
+              $('#topVideos').css('display', 'block');
               //------------------------------END top video table creation ------------------------------------------
-  
-  
-  
               displayChannelData();
   
           })
           .catch(error => console.error(error));
+          loadingElement.style.display = "none";
   
   });
   
@@ -260,6 +268,35 @@
       channelData.style.display = 'block';
   }
   
+  function populateAndSortTable(tableId, data, sortColumn) {
+    var table = $('#' + tableId);
+    table.find('tbody').empty(); //clear out existing rows 
+    // Sort based on the specified column
+    data.sort(function (a, b) {
+      if (sortColumn === 'published_date') {
+          // If sorting by date, convert the values to Date objects
+          var dateA = new Date(a[sortColumn]);
+          var dateB = new Date(b[sortColumn]);
+          return dateB - dateA; // Descending order
+      } else {
+          // For numeric columns, directly compare the values
+          return b[sortColumn] - a[sortColumn]; // Descending order
+      }
+    });
+
+    data.slice(0, 10).forEach(function (video) {
+      var row = $("<tr>");
+      row.append(`<td><img class="video-thumbnail" src="https://img.youtube.com/vi_webp/${video.video_id}/default.webp" alt="Video Thumbnail" style="width: 80px; height: 60px"></td>`);
+      row.append(`<td><a href="https://www.youtube.com/watch?v=${video.video_id}" target="_blank">${video.title}</a></td>`);
+      row.append(`<td>${new Date(video.published_date).toISOString().split('T')[0]}</td>`);
+      row.append(`<td>${Math.round(video.views_per_day).toLocaleString()}</td>`);
+      row.append(`<td>${Math.round(video.views).toLocaleString()}</td>`);
+
+      table.find('tbody').append(row);
+    });
+  }
+
+
 </script>
 {% endblock %}
 

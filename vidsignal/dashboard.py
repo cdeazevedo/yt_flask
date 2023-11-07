@@ -34,43 +34,32 @@ def dashboard():
 @bp.route('/dashboard/<selected_channel_id>')
 def dashboard_for_channel(selected_channel_id):
     channel_data = {}
-    # videos = get_channel_videos(selected_channel_id)
-    # channel_data['videos'] = videos
-    
     videos = process_realtime_data(get_realtime_videos(selected_channel_id))
     channel_data['realtime'] = videos
     channel_data['upload_frequency'] = upload_frequency(videos)
     channel_data['average_views'] = prepare_data_for_graph(get_average_views_per_year(selected_channel_id))
     # send top 15 realtime videos to openai for summary
     #channel_data['chatGPT_summary'] = get_chatgptsummary(realtime_data[:15])
-
     return jsonify(channel_data)
 
 ## Functions for the dashboard
 
 def process_realtime_data(video_list):
-    """Take the results of the realtime video query from SQL and turn into measure of new views on each video"""
+    # """Take the results of the realtime video query from SQL and turn into measure of new views on each video"""
     df = pd.DataFrame(video_list)
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
-    df = df.sort_values(['video_id', 'timestamp'])
-    # Calculate the new views and time elapsed for each video
-    df['new_views'] = df.groupby('video_id')['views'].diff()
-    df['time_elapsed'] = df.groupby('video_id')['timestamp'].diff().dt.total_seconds()
-    # drop NA
-    df = df.dropna()
-    # convert to daily views
-    df['views_per_day'] = df['new_views'] / (df['time_elapsed'] / (60 * 60 *24))
+    df = df.dropna(how='all')
+    df['time_change_seconds'] = df['time_change'].dt.total_seconds()
+    df['views_per_day'] = df['views_change'] / (df['time_change_seconds'] / (60 * 60 *24))
     data = df.groupby('video_id').agg({
-        'views_per_day': 'mean',
-        'title': 'first',
-        'published_date': 'first'
+        'views_per_day':'mean',
+        'title':'first',
+        'published_date':'first',
+        'views':'max'
     }).reset_index()
-    # join with max views for each video to get current_views 
-    views_data = df.groupby('video_id')['views'].max()
-    data = data.merge(views_data, on='video_id', how='left')
+    data.dropna(inplace=True)
     data = data.sort_values(by='views_per_day', ascending=False)
     data = data.to_dict(orient='records')
-
+  
     return data
 
 def upload_frequency(video_list):

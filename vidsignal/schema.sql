@@ -12,5 +12,6 @@ CREATE TABLE `channels` (
   `name` varchar(255) DEFAULT NULL,
   `thumbnail_uri` varchar(255) DEFAULT NULL,
   `published_date` datetime DEFAULT NULL,
+  `genre` varchar(255) NOT NULL,
   PRIMARY KEY (`channel_id`)
 );
