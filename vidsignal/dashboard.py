@@ -50,16 +50,20 @@ def process_realtime_data(video_list):
     df = df.dropna(how='all')
     df['time_change_seconds'] = df['time_change'].dt.total_seconds()
     df['views_per_day'] = df['views_change'] / (df['time_change_seconds'] / (60 * 60 *24))
+    # Convert 'published_date' to datetime objects with the specified format
+    df['published_date'] = pd.to_datetime(df['published_date'], format='%Y-%m-%d')
+    # Convert datetime objects to ISO 8601 date format (YYYY-MM-DD)
+    df['published_date'] = df['published_date'].dt.strftime('%Y-%m-%d')
     data = df.groupby('video_id').agg({
         'views_per_day':'mean',
         'title':'first',
+        'duration':'first',
         'published_date':'first',
         'views':'max'
     }).reset_index()
     data.dropna(inplace=True)
     data = data.sort_values(by='views_per_day', ascending=False)
     data = data.to_dict(orient='records')
-  
     return data
 
 def upload_frequency(video_list):
