@@ -7,3 +7,7 @@
 README
 script_log.txt
 .gitignore
+ccd-home.pem
+README
+get_channels.py
+/keys

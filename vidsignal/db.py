@@ -24,7 +24,15 @@ def get_channels():
     cursor = db.cursor()
     sql_query = '''
     SELECT channel_id, name, thumbnail_uri, published_date
-    FROM channels 
+    FROM channels c
+    WHERE EXISTS (
+        SELECT 1
+        FROM videos v
+        JOIN video_views vv ON v.video_id = vv.video_id
+        WHERE v.channel_id = c.channel_id
+        GROUP BY v.video_id
+        HAVING COUNT(*) >= 2
+    )
     ORDER BY name
     '''
     with cursor as crsr:

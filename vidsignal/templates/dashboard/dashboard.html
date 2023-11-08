@@ -10,7 +10,7 @@
 
 {% block content %}
 <h2>Select a channel</h2>
-<select id="channelSelect">
+<select id="channelSelect" class="form-control">
   <option value="" disabled selected>Channel List</option>
   {% for channel in data['channels'] %}
   <option value="{{ channel['channel_id'] }}"
@@ -23,7 +23,7 @@
 </select>
 
 <h2 id="channelDataTitle" style="display: none">Channel Data</h2>
-<div id="channelData">
+<div id="channelData" style="display: none">
   <div class="thumbnail">
     <img class="channel-info" id="thumbnailImage" src="" alt="Channel Thumbnail" style="max-width: 300px;">
   </div>
@@ -66,7 +66,7 @@
 <div id="topVideos" style="display:none">
   <h2>Hot videos</h2>
   <!-- Top 10 Realtime videos  display-->
-  <table id="topRealtime">
+  <table class="table table-striped" id="topRealtime">
     <thead>
       <tr>
         <th>Thumbnail</th>
@@ -83,7 +83,7 @@
 
   <!-- Top 10 All-Time videos  display-->
   <h2>All-time most popular videos</h2>
-  <table id="topAlltime">
+  <table class="table table-striped" id="topAlltime">
     <thead>
       <tr>
         <th>Thumbnail</th>
@@ -99,7 +99,7 @@
   </table>
 
   <h2>Recent uploads</h2>
-  <table id="mostRecent">
+  <table class="table table-striped" id="mostRecent">
     <thead>
       <tr>
         <th>Thumbnail</th>
@@ -175,8 +175,10 @@
                   },
               };
               const config = {
-                  displayModeBar: false, // this is the line that hides the bar.
+                displayModeBar: false, // Hide the mode bar (zoom, pan, etc.)
+                staticPlot: true,      // Disable zooming and panning, but allow hover
               };
+                         
               // Create the plot in the specified div element
               Plotly.newPlot('uploadFrequencyPlot', [frequency_plot_data], layout, config);
               // Create barplot of views by upload year 
@@ -233,9 +235,7 @@
               displayChannelData();
   
           })
-          .catch(error => console.error(error));
-          loadingElement.style.display = "none";
-  
+          .catch(error => console.error(error));  
   });
   
   /// this handles showing channel data that comes in
@@ -264,6 +264,7 @@
   
   
       // Show the 'Channel Data' element
+      channelDataDiv.style.display = 'block'; 
       channelDataTitle.style.display = 'block';
       channelData.style.display = 'block';
   }
