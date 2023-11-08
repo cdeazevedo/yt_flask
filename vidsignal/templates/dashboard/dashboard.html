@@ -2,7 +2,6 @@
 
 {% block header %}
   <h1 style="color:#1877f2">{% block title %}Channel Analytics{% endblock %}</h1>
-
 {% endblock %} 
 
 {% block content %}
@@ -19,36 +18,58 @@
   {% endfor %}
 </select>
 
-<h2 id="channelDataTitle" style="display: none">Channel Data</h2>
-<div id="channelData" style="display: none">
-  <div class="thumbnail">
-    <img class="channel-info" id="thumbnailImage" src="" alt="Channel Thumbnail" style="max-width: 300px;">
-  </div>
-  <div class="info">
-    <div class="title-info">
-      <div class="channel-info">
-        <strong>Channel:</strong> <span id="channelName"></span>
+<!-- Main Channel Info goes here -->
+<div id="channelData" class="row" style="display: none">
+  
+  <div class="col-md-4">
+    <div class="info">
+      <!-- First Row -->
+      <div class="row">
+        <div class="col-md-4">
+          <div class="thumbnail">
+            <img class="channel-info" id="thumbnailImage" src="" alt="Channel Thumbnail" style="max-width: 150px;">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="channel-info-box">
+
+            <strong>Total videos:</strong>
+            <span id="totalVideos"></span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="channel-info-box">
+            <strong>Lifetime views:</strong>
+            <span id="totalViews"></span>
+          </div>
+        </div>
       </div>
-      <div class="channel-info">
-        <strong>Published date:</strong> <span id="publishedDate"></span>
-      </div>
-      <div class="channel-info">
-        <strong>Lifetime views:</strong> <span id="totalViews"></span>
-      </div>
-    </div>
-    <div class="stats-info">
-      <div class="channel-info">
-        <strong>Total videos:</strong> <span id="totalVideos"></span>
-      </div>
-      <div class="channel-info">
-        <strong>Average views per video:</strong> <span id="averageViews"></span>
-      </div>
-      <div class="channel-info">
-        <strong>Current Daily Views:</strong> <span id="totalDailyViews"></span>
+      <!-- Second Row -->
+      <div class="row">
+        <div class="col-md-4">
+          <div class="channel-info-box">
+            <strong>Created:</strong>
+            <span id="publishedDate"></span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="channel-info-box">
+            <strong>Average views per video:</strong>
+            <span id="averageViews"></span>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="channel-info-box">
+            <strong>Current Daily Views:</strong>
+            <span id="totalDailyViews"></span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+
 
 <!-- Container for the plots -->
 <div id="plotContainer">
@@ -122,7 +143,6 @@
       element.style.display = "none";
   });
   var channelSelect = document.getElementById("channelSelect");
-  var channelDataTitle = document.getElementById("channelDataTitle");
   var totalVideos;
   var totalViews;
   var averageViews;
@@ -277,29 +297,24 @@
       var channelDataDiv = document.getElementById("channelData");
       var channelSelect = document.getElementById("channelSelect");
       var selectedOption = channelSelect.options[channelSelect.selectedIndex];
-      var channelNameElement = document.getElementById("channelName");
       var publishedDateElement = document.getElementById("publishedDate");
       var thumbnailImageElement = document.getElementById("thumbnailImage");
       var totalViewsElement = document.getElementById("totalViews");
       var totalVideosElement = document.getElementById("totalVideos");
       var averageViewsElement = document.getElementById("averageViews");
       // Get data from the selected option's data attributes
-      var channelName = selectedOption.getAttribute("data-channel-name");
       var publishedDate = selectedOption.getAttribute("data-published-date");
       var thumbnailUri = selectedOption.getAttribute("data-thumbnail-uri");
   
       // Update the placeholders with the selected channel's data
-      channelNameElement.textContent = channelName;
       publishedDateElement.textContent = publishedDate;
       thumbnailImageElement.src = thumbnailUri;
       totalVideosElement.textContent = totalVideos.toLocaleString();
       totalViewsElement.textContent = totalViews.toLocaleString();
       averageViewsElement.textContent = averageViews.toLocaleString();
   
-  
       // Show the 'Channel Data' element
       channelDataDiv.style.display = 'block'; 
-      channelDataTitle.style.display = 'block';
       channelData.style.display = 'block';
   }
   
