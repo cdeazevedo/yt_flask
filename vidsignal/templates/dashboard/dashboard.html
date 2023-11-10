@@ -336,7 +336,7 @@
 
     data.slice(0, 10).forEach(function (video) {
       var row = $("<tr>");
-      row.append(`<td><img class="video-thumbnail" src="https://img.youtube.com/vi_webp/${video.video_id}/default.webp" alt="Video Thumbnail" style="width: 80px; height: 60px"></td>`);
+      row.append(`<td><img class="video-thumbnail" src="https://img.youtube.com/vi/${video.video_id}/default.jpg" alt="Video Thumbnail" style="width: 80px; height: 60px"></td>`);
       row.append(`<td><a href="https://www.youtube.com/watch?v=${video.video_id}" target="_blank">${video.title}</a></td>`);
       row.append(`<td>${new Date(video.published_date).toISOString().split('T')[0]}</td>`);
       row.append(`<td>${video.duration}</td>`);
