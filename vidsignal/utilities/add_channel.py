@@ -1,7 +1,7 @@
 from vidsignal.config import YT_API_KEY, create_db_connection
 from other.utilities.get_related import getChannelData, channelPublished, channelThumbnail, channelNameFrom, searchAPI
 
-def addChannel(channel_id, genre):
+def add_channel(channel_id, genre):
     '''Given a channel id and genre, retrieve from API and save data about channel to channel tables.
     genre should be lowercase.'''
     try:
@@ -29,6 +29,6 @@ def addChannel(channel_id, genre):
     except Exception as e:
         print(f"Error processing channel_id: {channel_id} - Error: {str(e)}")
     
-def lookupChannelID(query):
+def lookup_channel_id(query):
     '''Search YOUTUBE api for channel_id. Note, this is expensive API query'''
     

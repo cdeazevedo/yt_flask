@@ -99,3 +99,11 @@ def get_average_views_per_year(channel_id):
     column_names = [desc[0] for desc in cursor.description]
     video_list = [dict(zip(column_names, row)) for row in videos]
     return video_list
+
+def get_genres():
+    with create_db_connection().cursor() as cursor:
+        cursor.execute('''
+                       SELECT DISTINCT GENRE FROM channels
+                       ''')
+        columns = [desc[0] for desc in cursor.description]
+        return [dict(zip(columns, row)) for row in cursor.fetchall()]

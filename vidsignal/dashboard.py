@@ -5,7 +5,7 @@ from flask import (
 import pandas as pd
 import openai
 
-from vidsignal.db import get_channels, get_realtime_videos, get_average_views_per_year
+from vidsignal.db import get_channels, get_realtime_videos, get_average_views_per_year, get_genres
 from . config import OPEN_AI_KEY
 
 app = current_app
@@ -41,6 +41,11 @@ def dashboard_for_channel(selected_channel_id):
     # send top 15 realtime videos to openai for summary
     #channel_data['chatGPT_summary'] = get_chatgptsummary(realtime_data[:15])
     return jsonify(channel_data)
+
+@bp.route('/dashboard/genres')
+def genre_dashboard():
+    genres = get_genres
+    return render_template('dashboard/genres.html')
 
 ## Functions for the dashboard
 
