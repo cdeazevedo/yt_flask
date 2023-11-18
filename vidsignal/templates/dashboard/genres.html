@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1 style="color:#1877f2">{% block title %}Genre Analytics{% endblock %}</h1>
+{% endblock %} 
+
+{% block content %}
+  <h2>Select a genre</h2>
+  <select id='genre-select' class='form-control'>
+    <option value="" disable selected>Genres</option>
+    {% for genre in genres %}
+      <option value="{{ genre['genre'] }}">
+        {{ genre['genre']|capitalize }}
+      </option>
+    {% endfor %}
+  </select>
+
+
+<script>
+  var genreSelect = document.getElementById("genre-select"); 
+  genreSelect.addEventListener("change", function () {
+    var selectedGenre = genreSelect.value;
+    fetch('/dashboard/genres/' + encodeURIComponent(selectedGenre), {
+      method: 'GET',
+  })
+  });
+</script>
+{% endblock %}

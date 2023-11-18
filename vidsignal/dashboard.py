@@ -44,8 +44,12 @@ def dashboard_for_channel(selected_channel_id):
 
 @bp.route('/dashboard/genres')
 def genre_dashboard():
-    genres = get_genres
-    return render_template('dashboard/genres.html')
+    genres = get_genres()
+    return render_template('dashboard/genres.html', genres=genres)
+
+@bp.route('/dashboard/genres/<genre>')
+def return_genre_data(genre):
+    return f"<p>{genre}</p>"
 
 ## Functions for the dashboard
 
